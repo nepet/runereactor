@@ -27,6 +27,23 @@ const OPERATORS = [
   { sym: "~", label: "contains" },
 ];
 
+const FIELDS = [
+  { value: "time", hint: "Current UNIX timestamp", group: "built-in" },
+  { value: "id", hint: "Node ID of the peer", group: "built-in" },
+  { value: "method", hint: "Command being run", group: "built-in" },
+  { value: "per", hint: "Rate limit interval (e.g. 5sec, 1min, 1hour, 1day)", group: "built-in" },
+  { value: "rate", hint: "Rate limit per minute", group: "built-in" },
+  { value: "pnum", hint: "Number of parameters", group: "built-in" },
+  { value: "pnameamount_msat", hint: "Named param: amount_msat", group: "pname" },
+  { value: "pnamedestination", hint: "Named param: destination", group: "pname" },
+  { value: "pnamedescription", hint: "Named param: description", group: "pname" },
+  { value: "pnamelabel", hint: "Named param: label", group: "pname" },
+  { value: "pnameinvstring", hint: "Named param: invstring", group: "pname" },
+  { value: "pnamebolt11", hint: "Named param: bolt11", group: "pname" },
+  { value: "parr0", hint: "First positional parameter", group: "parr" },
+  { value: "parr1", hint: "Second positional parameter", group: "parr" },
+];
+
 @customElement("rf-builder")
 export class RfBuilder extends LitElement {
   @state() private _tagField = "";
@@ -267,6 +284,7 @@ export class RfBuilder extends LitElement {
       <!-- When Blocks -->
       <div class="section">
         <div class="section-title">When Blocks</div>
+        <div style="font-size:0.7rem;color:#999;margin-bottom:0.5rem">Constrain specific methods. Use <code style="font-size:0.65rem;background:#f7f8fa;padding:0.1rem 0.2rem;border-radius:2px">pnameX</code> for named parameters, <code style="font-size:0.65rem;background:#f7f8fa;padding:0.1rem 0.2rem;border-radius:2px">parrN</code> for positional.</div>
         ${this._whens.map((w, wi) => html`
           <div class="when-block">
             <div class="when-header">
@@ -332,7 +350,21 @@ export class RfBuilder extends LitElement {
   ) {
     return html`
       <div class="row">
-        <input placeholder="field" .value=${c.field} @input=${(e: InputEvent) => onChange("field", (e.target as HTMLInputElement).value)}>
+        <select @change=${(e: Event) => {
+          const val = (e.target as HTMLSelectElement).value;
+          if (val !== "__custom__") {
+            onChange("field", val);
+          } else {
+            onChange("field", "");
+          }
+        }}>
+          <option value="" ?selected=${!c.field}>Select field...</option>
+          ${FIELDS.map(f => html`<option value=${f.value} ?selected=${c.field === f.value}>${f.value} — ${f.hint}</option>`)}
+          <option value="__custom__" ?selected=${c.field !== "" && !FIELDS.some(f => f.value === c.field)}>Custom...</option>
+        </select>
+        ${c.field !== "" && !FIELDS.some(f => f.value === c.field) ? html`
+          <input placeholder="pnameX, parrN, etc." .value=${c.field} @input=${(e: InputEvent) => onChange("field", (e.target as HTMLInputElement).value)}>
+        ` : nothing}
         <select .value=${c.op} @change=${(e: Event) => onChange("op", (e.target as HTMLSelectElement).value)}>
           ${OPERATORS.map(o => html`<option value=${o.sym} ?selected=${c.op === o.sym}>${o.sym} (${o.label})</option>`)}
         </select>
