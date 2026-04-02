@@ -4,7 +4,7 @@ use rune_forge::types::Op;
 
 #[test]
 fn test_operator_rf() {
-    let input = include_str!("../examples/operator.rf");
+    let input = include_str!("../../../examples/operator.rf");
     let policy = parse_policy(input).unwrap();
     let rune = compile(&policy).unwrap();
 
@@ -36,7 +36,7 @@ fn test_operator_rf() {
 
 #[test]
 fn test_advanced_rf() {
-    let input = include_str!("../examples/advanced.rf");
+    let input = include_str!("../../../examples/advanced.rf");
     let policy = parse_policy(input).unwrap();
     let rune = compile(&policy).unwrap();
 

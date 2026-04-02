@@ -1,1 +1,8 @@
 /target
+crates/*/target
+site/public
+site/static/*.wasm
+site/static/*.js
+components/node_modules
+components/dist
+.superpowers
