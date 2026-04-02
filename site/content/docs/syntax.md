@@ -106,26 +106,47 @@ Core Lightning checks these fields when evaluating rune restrictions:
 
 ### Parameter Fields
 
-| Prefix | Description | Example |
-|--------|-------------|---------|
-| `pnameX` | Named parameter `X`. Use the actual parameter name, e.g. `pnamedestination` for the `destination` parameter | `pnamedestination = bc1q...` |
-| `parrN` | The N-th positional parameter (zero-indexed) | `parr0 = bc1q...` |
-| `pinvX_N` | Parse parameter `X` as a bolt11/bolt12 invoice and extract field `N`. Valid subfields: `amount`, `description`, `node` | `pinvinvstring_amount < 1000000` |
+These are composable — you combine a prefix with a parameter name or position to form the full field name.
 
-### Common Parameter Names
+#### `pnameX` — Named parameter
 
-These are frequently used `pname` fields in CLN commands:
+`X` is the name of the parameter as defined by the CLN command. For example, the `xpay` command has a parameter called `amount_msat`, so you'd write `pnameamount_msat`.
 
-- `pnameamount_msat` — payment amount in millisatoshis
-- `pnamedestination` — destination address or node ID
-- `pnamedescription` — invoice description
-- `pnamelabel` — label for invoices/payments
-- `pnameinvstring` — invoice string (bolt11/bolt12)
-- `pnamebolt11` — bolt11 invoice string
-- `pnamechannel_id` — channel identifier
-- `pnameamount` — amount in satoshis (e.g. for `fundchannel`)
+```
+when xpay:
+  pnameamount_msat < 1000000001
+when fundchannel:
+  pnameamount < 1000001
+when close:
+  pnamedestination = bc1qexampleaddress
+```
+
+Common parameter names: `amount_msat`, `amount`, `destination`, `description`, `label`, `invstring`, `bolt11`, `channel_id`.
 
 > **Note:** Prior to CLN v24.05, underscores had to be removed from parameter names (e.g. `pnameamountmsat` instead of `pnameamount_msat`). This is no longer required.
+
+#### `parrN` — Positional parameter
+
+`N` is the zero-indexed position of the parameter. `parr0` is the first parameter, `parr1` is the second, etc.
+
+```
+when withdraw:
+  parr0 = bc1qexampleaddress
+```
+
+This is useful when you want to constrain a parameter by its position rather than its name.
+
+#### `pinvX_N` — Invoice field extraction
+
+Parses the parameter named `X` as a bolt11 or bolt12 invoice, then extracts subfield `N` for comparison. The restriction fails if the parameter is missing, doesn't parse as an invoice, or `N` is not a valid subfield.
+
+Valid subfields: `amount`, `description`, `node`.
+
+```
+when xpay:
+  pinvinvstring_amount < 1000000
+  pinvinvstring_node = 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605
+```
 
 ## Expressions
 

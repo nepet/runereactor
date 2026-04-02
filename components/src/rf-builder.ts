@@ -27,22 +27,25 @@ const OPERATORS = [
   { sym: "~", label: "contains" },
 ];
 
-const FIELDS = [
-  { value: "time", hint: "Current UNIX timestamp", group: "built-in" },
-  { value: "id", hint: "Node ID of the peer", group: "built-in" },
-  { value: "method", hint: "Command being run", group: "built-in" },
-  { value: "per", hint: "Rate limit interval (e.g. 5sec, 1min, 1hour, 1day)", group: "built-in" },
-  { value: "rate", hint: "Rate limit per minute", group: "built-in" },
-  { value: "pnum", hint: "Number of parameters", group: "built-in" },
-  { value: "pnameamount_msat", hint: "Named param: amount_msat", group: "pname" },
-  { value: "pnamedestination", hint: "Named param: destination", group: "pname" },
-  { value: "pnamedescription", hint: "Named param: description", group: "pname" },
-  { value: "pnamelabel", hint: "Named param: label", group: "pname" },
-  { value: "pnameinvstring", hint: "Named param: invstring", group: "pname" },
-  { value: "pnamebolt11", hint: "Named param: bolt11", group: "pname" },
-  { value: "parr0", hint: "First positional parameter", group: "parr" },
-  { value: "parr1", hint: "Second positional parameter", group: "parr" },
+// Fixed fields that can be selected directly
+const FIXED_FIELDS = [
+  { value: "time", hint: "Current UNIX timestamp" },
+  { value: "id", hint: "Node ID of the peer" },
+  { value: "method", hint: "Command being run" },
+  { value: "per", hint: "Rate limit interval (sec, min, hour, day)" },
+  { value: "rate", hint: "Rate limit per minute" },
+  { value: "pnum", hint: "Number of parameters" },
 ];
+
+// Composable field types — user provides the variable part
+const FIELD_TYPES = [
+  { prefix: "pname", label: "Named parameter", placeholder: "param name, e.g. amount_msat" },
+  { prefix: "parr", label: "Positional parameter", placeholder: "position, e.g. 0, 1, 2" },
+  { prefix: "pinv", label: "Invoice field", placeholder: "param_subfield, e.g. invstring_amount" },
+];
+
+// Valid pinv subfields for the hint text
+const PINV_SUBFIELDS = ["amount", "description", "node"];
 
 @customElement("rf-builder")
 export class RfBuilder extends LitElement {
@@ -343,27 +346,70 @@ export class RfBuilder extends LitElement {
     `;
   }
 
+  private _getFieldType(field: string): { type: "fixed" | "pname" | "parr" | "pinv" | "custom"; suffix: string } {
+    if (!field) return { type: "fixed", suffix: "" };
+    if (FIXED_FIELDS.some(f => f.value === field)) return { type: "fixed", suffix: "" };
+    if (field.startsWith("pinv")) return { type: "pinv", suffix: field.slice(4) };
+    if (field.startsWith("pname")) return { type: "pname", suffix: field.slice(5) };
+    if (field.startsWith("parr")) return { type: "parr", suffix: field.slice(4) };
+    return { type: "custom", suffix: field };
+  }
+
   private _renderConditionRow(
     c: Condition,
     onChange: (field: string, val: string) => void,
     onRemove: () => void
   ) {
+    const ft = this._getFieldType(c.field);
+
+    // Determine what the first dropdown shows
+    let selectValue = "";
+    if (!c.field) selectValue = "";
+    else if (ft.type === "fixed") selectValue = c.field;
+    else if (ft.type === "custom") selectValue = "__custom__";
+    else selectValue = `__${ft.type}__`;
+
     return html`
       <div class="row">
         <select @change=${(e: Event) => {
           const val = (e.target as HTMLSelectElement).value;
-          if (val !== "__custom__") {
-            onChange("field", val);
+          if (val.startsWith("__") && val.endsWith("__")) {
+            // Composable type selected — clear field, user will type suffix
+            onChange("field", val === "__custom__" ? "" : val.slice(2, -2));
           } else {
-            onChange("field", "");
+            onChange("field", val);
           }
         }}>
-          <option value="" ?selected=${!c.field}>Select field...</option>
-          ${FIELDS.map(f => html`<option value=${f.value} ?selected=${c.field === f.value}>${f.value} — ${f.hint}</option>`)}
-          <option value="__custom__" ?selected=${c.field !== "" && !FIELDS.some(f => f.value === c.field)}>Custom...</option>
+          <option value="" ?selected=${selectValue === ""}>Select field...</option>
+          ${FIXED_FIELDS.map(f => html`<option value=${f.value} ?selected=${selectValue === f.value}>${f.value} — ${f.hint}</option>`)}
+          <optgroup label="Composable fields">
+            ${FIELD_TYPES.map(ft => html`<option value=${"__" + ft.prefix + "__"} ?selected=${selectValue === "__" + ft.prefix + "__"}>${ft.prefix}... — ${ft.label}</option>`)}
+          </optgroup>
+          <option value="__custom__" ?selected=${selectValue === "__custom__"}>Custom...</option>
         </select>
-        ${c.field !== "" && !FIELDS.some(f => f.value === c.field) ? html`
-          <input placeholder="pnameX, parrN, etc." .value=${c.field} @input=${(e: InputEvent) => onChange("field", (e.target as HTMLInputElement).value)}>
+        ${ft.type === "pname" ? html`
+          <input style="max-width:140px" placeholder="param name" .value=${ft.suffix} @input=${(e: InputEvent) => onChange("field", "pname" + (e.target as HTMLInputElement).value)}>
+        ` : nothing}
+        ${ft.type === "parr" ? html`
+          <input style="max-width:60px" type="number" min="0" placeholder="N" .value=${ft.suffix} @input=${(e: InputEvent) => onChange("field", "parr" + (e.target as HTMLInputElement).value)}>
+        ` : nothing}
+        ${ft.type === "pinv" ? html`
+          <input style="max-width:100px" placeholder="param name" .value=${ft.suffix.includes("_") ? ft.suffix.split("_")[0] : ft.suffix} @input=${(e: InputEvent) => {
+            const param = (e.target as HTMLInputElement).value;
+            const subfield = ft.suffix.includes("_") ? ft.suffix.split("_").slice(1).join("_") : "";
+            onChange("field", "pinv" + param + (subfield ? "_" + subfield : ""));
+          }}>
+          <select style="max-width:120px" @change=${(e: Event) => {
+            const subfield = (e.target as HTMLSelectElement).value;
+            const param = ft.suffix.includes("_") ? ft.suffix.split("_")[0] : ft.suffix;
+            onChange("field", "pinv" + param + "_" + subfield);
+          }}>
+            <option value="" ?selected=${!ft.suffix.includes("_")}>subfield...</option>
+            ${PINV_SUBFIELDS.map(s => html`<option value=${s} ?selected=${ft.suffix.includes("_") && ft.suffix.split("_").slice(1).join("_") === s}>${s}</option>`)}
+          </select>
+        ` : nothing}
+        ${ft.type === "custom" ? html`
+          <input placeholder="field name" .value=${c.field} @input=${(e: InputEvent) => onChange("field", (e.target as HTMLInputElement).value)}>
         ` : nothing}
         <select .value=${c.op} @change=${(e: Event) => onChange("op", (e.target as HTMLSelectElement).value)}>
           ${OPERATORS.map(o => html`<option value=${o.sym} ?selected=${c.op === o.sym}>${o.sym} (${o.label})</option>`)}
