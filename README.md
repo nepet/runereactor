@@ -191,14 +191,12 @@ for restriction in &rune_policy.restrictions {
 ## Tests
 
 ```bash
-cargo test               # Run all 22 tests
-cargo test test_name     # Run a single test by name
+make test
 ```
 
 ## Related Projects
 
 - [futhark](https://github.com/nepet/futhark) — Rust implementation of the runes authorization library (`runeauth` crate)
-- [rune-biscuit](https://github.com/nepet/rune-biscuit) — Convert between rune-forge policies, Biscuit tokens, and CLN runes
 
 ## License
 
