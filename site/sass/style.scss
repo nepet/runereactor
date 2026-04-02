@@ -108,6 +108,12 @@ nav {
 
   .nav-github {
     color: $text-tertiary;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      color: $text;
+    }
   }
 }
 
@@ -292,6 +298,24 @@ footer {
   p {
     font-size: 0.85rem;
     color: $text-tertiary;
+  }
+
+  .footer-links {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+
+    a {
+      color: $text-tertiary;
+
+      &:hover {
+        color: $primary-dark;
+      }
+    }
+
+    .sep {
+      margin: 0 0.4rem;
+      color: $border;
+    }
   }
 }
 
