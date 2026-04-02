@@ -1,0 +1,8 @@
+base_url = "https://rune-forge.github.io"
+title = "rune-forge"
+description = "Write human-readable policies for Core Lightning runes"
+compile_sass = true
+build_search_index = false
+
+[extra]
+version = "0.1.0"

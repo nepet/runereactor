@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ config.title }}{% endblock %}</title>
+  <meta name="description" content="{{ config.description }}">
+  <link rel="stylesheet" href="{{ get_url(path='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script type="module" src="{{ get_url(path='rf-components.js') }}"></script>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="{{ get_url(path='/') }}" class="logo">&#9874; rune-forge</a>
+      <div class="nav-links">
+        <a href="{{ get_url(path='playground') }}">Playground</a>
+        <a href="{{ get_url(path='decoder') }}">Decoder</a>
+        <a href="{{ get_url(path='builder') }}">Builder</a>
+        <a href="{{ get_url(path='docs') }}">Docs</a>
+        <a href="https://github.com/rune-forge/rune-forge" class="nav-github">GitHub</a>
+      </div>
+    </div>
+  </nav>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <p>rune-forge v{{ config.extra.version }} &mdash; Part of the Core Lightning ecosystem</p>
+  </footer>
+</body>
+</html>
