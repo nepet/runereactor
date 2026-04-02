@@ -1,31 +1,44 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <section class="hero">
-  <h1>rune-forge</h1>
-  <p class="tagline">Write human-readable policies for Core Lightning runes.<br>
-  Compile to JSON, CLN commands, or raw restrictions.</p>
-  <p class="ecosystem">Part of the Core Lightning ecosystem</p>
+    <h1>rune-forge</h1>
+    <p class="tagline">
+        Write human-readable policies for Core Lightning runes.<br />
+        Compile to JSON, CLN commands, or raw restrictions.
+    </p>
 </section>
 <section class="demo">
-  <rf-playground readonly format="json" source="allow methods: listfunds, xpay
+    <rf-playground
+        readonly
+        format="json"
+        source="allow methods: listfunds, xpay
 
 when xpay:
-  pnameamount_msat < 1000000001 or pnameamount_msat !"></rf-playground>
+  pnameamount_msat < 1000000001 or pnameamount_msat !"
+    ></rf-playground>
 </section>
 <section class="features">
-  <div class="feature-grid">
-    <div class="feature-card">
-      <h3>Human-Readable</h3>
-      <p>Write policies in plain English-like syntax instead of cryptic restriction arrays.</p>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h3>Human-Readable</h3>
+            <p>
+                Write policies in plain English-like syntax instead of cryptic
+                restriction arrays.
+            </p>
+        </div>
+        <div class="feature-card">
+            <h3>CNF Compiler</h3>
+            <p>
+                Automatic conversion to Conjunctive Normal Form — handles
+                complex boolean logic for you.
+            </p>
+        </div>
+        <div class="feature-card">
+            <h3>Client-Side</h3>
+            <p>
+                Everything runs in your browser via WASM. No data sent to any
+                server.
+            </p>
+        </div>
     </div>
-    <div class="feature-card">
-      <h3>CNF Compiler</h3>
-      <p>Automatic conversion to Conjunctive Normal Form — handles complex boolean logic for you.</p>
-    </div>
-    <div class="feature-card">
-      <h3>Client-Side</h3>
-      <p>Everything runs in your browser via WASM. No data sent to any server.</p>
-    </div>
-  </div>
 </section>
 {% endblock %}
