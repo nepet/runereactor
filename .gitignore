@@ -7,3 +7,4 @@ components/node_modules
 components/dist
 crates/*/pkg
 .superpowers
+.worktrees
