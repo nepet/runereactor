@@ -1,6 +1,6 @@
 import { LitElement, html, css, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { generatePolicy, compilePolicy } from "./wasm-bridge.js";
+import { generatePolicy, compilePolicy, createRune } from "./wasm-bridge.js";
 import "./rf-output.js";
 
 interface Condition {
@@ -57,8 +57,10 @@ export class RfBuilder extends LitElement {
   @state() private _globals: Condition[] = [];
   @state() private _rfSource = "";
   @state() private _output = "";
-  @state() private _outputFormat: "json" | "cln" | "raw" = "json";
+  @state() private _outputFormat: "json" | "cln" | "raw" | "rune" = "json";
   @state() private _error = "";
+  @state() private _runeOutput = "";
+  @state() private _secret = "0000000000000000000000000000000000000000000000000000000000000000";
 
   static styles = css`
     :host {
@@ -341,7 +343,7 @@ export class RfBuilder extends LitElement {
 
       <!-- Compiled Output -->
       ${this._rfSource ? html`
-        <rf-output .output=${this._output} .format=${this._outputFormat} .error=${this._error} @format-change=${this._onFormatChange}></rf-output>
+        <rf-output .output=${this._output} .format=${this._outputFormat} .error=${this._error} .runeOutput=${this._runeOutput} .secret=${this._secret} @format-change=${this._onFormatChange} @secret-change=${this._onSecretChange}></rf-output>
       ` : nothing}
     `;
   }
@@ -454,6 +456,11 @@ export class RfBuilder extends LitElement {
     this._compile();
   }
 
+  private _onSecretChange(e: CustomEvent) {
+    this._secret = e.detail;
+    this._compile();
+  }
+
   private async _generate() {
     const methods = this._methods
       .split(",")
@@ -500,11 +507,22 @@ export class RfBuilder extends LitElement {
   private async _compile() {
     if (!this._rfSource) return;
     try {
-      this._output = await compilePolicy(this._rfSource, this._outputFormat);
+      const fmt = this._outputFormat === "rune" ? "raw" : this._outputFormat;
+      this._output = await compilePolicy(this._rfSource, fmt);
       this._error = "";
+      if (this._outputFormat === "rune") {
+        try {
+          const raw = await compilePolicy(this._rfSource, "raw");
+          this._runeOutput = await createRune(this._secret, raw);
+        } catch (re) {
+          this._runeOutput = "";
+          this._error = String(re);
+        }
+      }
     } catch (e) {
       this._error = String(e);
       this._output = "";
+      this._runeOutput = "";
     }
   }
 }
