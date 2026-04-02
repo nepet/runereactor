@@ -22,41 +22,25 @@ A `.rf` policy file consists of **directives** — top-level statements that def
 
 Restricts the rune to a specific commando peer by their Lightning node public key. Only that peer can use the rune.
 
-```
-id: 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605
-```
-
-Compiles to: `id=024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605`
+<rf-playground format="raw" source="id: 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605"></rf-playground>
 
 ### tag
 
 Adds metadata as a comment restriction (`#` operator). Comment restrictions always pass — Core Lightning ignores them during authorization. They are visible in `lightning-cli showrunes` output.
 
-```
-tag: purpose channel-management
-tag: version 2
-```
-
-Compiles to: `purpose#channel-management`, `version#2`
+<rf-playground format="raw" source="tag: purpose channel-management&#10;tag: version 2"></rf-playground>
 
 ### allow methods
 
 Creates a method whitelist. The listed methods are the only ones the rune holder can call.
 
-```
-allow methods: listfunds, listpeerchannels, xpay
-```
-
-Compiles to one restriction with alternatives: `method=listfunds|method=listpeerchannels|method=xpay`
+<rf-playground format="raw" source="allow methods: listfunds, listpeerchannels, xpay"></rf-playground>
 
 ### when
 
 Applies constraints conditionally — only when a specific method is being called. The constraints are indented below the `when` line.
 
-```
-when xpay:
-  pnameamount_msat < 1000000001
-```
+<rf-playground format="raw" source="when xpay:&#10;  pnameamount_msat < 1000000001"></rf-playground>
 
 Uses **negation bypass**: compiles to `method/xpay|pnameamount_msat<1000000001`. If the method is *not* xpay, the restriction passes automatically. If it *is* xpay, the condition must hold.
 
@@ -64,12 +48,7 @@ Uses **negation bypass**: compiles to `method/xpay|pnameamount_msat<1000000001`.
 
 Applies constraints to every method call, regardless of which method is used. Indented below the `global:` line.
 
-```
-global:
-  rate = 10
-```
-
-Compiles to: `rate=10`
+<rf-playground format="raw" source="global:&#10;  rate = 10"></rf-playground>
 
 ## Operators
 
@@ -156,11 +135,7 @@ Inside `when` and `global` blocks, each indented line is a **condition**. A cond
 
 Multiple lines within a block are implicitly AND'd together:
 
-```
-when xpay:
-  pnameamount_msat < 1000000001
-  rate = 10
-```
+<rf-playground format="raw" source="when xpay:&#10;  pnameamount_msat < 1000000001&#10;  rate = 10"></rf-playground>
 
 This produces two separate restrictions — both must pass.
 
@@ -168,10 +143,7 @@ This produces two separate restrictions — both must pass.
 
 Use `or` to combine conditions as alternatives within a single restriction:
 
-```
-when xpay:
-  pnameamount_msat < 1000000001 or pnameamount_msat !
-```
+<rf-playground format="raw" source="when xpay:&#10;  pnameamount_msat < 1000000001 or pnameamount_msat !"></rf-playground>
 
 This produces one restriction with two alternatives — either one can pass.
 
@@ -179,10 +151,7 @@ This produces one restriction with two alternatives — either one can pass.
 
 Use parentheses to group sub-expressions:
 
-```
-when xpay:
-  (pnameamount_msat < 1000000001 or pnameamount_msat !) and rate = 10
-```
+<rf-playground format="raw" source="when xpay:&#10;  (pnameamount_msat < 1000000001 or pnameamount_msat !) and rate = 10"></rf-playground>
 
 ### Expression Grammar
 
@@ -214,11 +183,6 @@ This means you can write natural boolean expressions and the compiler handles th
 
 When you use `when method:`, the compiler prepends a negation bypass to each restriction:
 
-```
-when xpay:
-  pnameamount_msat < 1000000001
-```
-
-Becomes: `method/xpay | pnameamount_msat<1000000001`
+<rf-playground format="raw" source="when xpay:&#10;  pnameamount_msat < 1000000001"></rf-playground>
 
 The `method/xpay` alternative means "if the method is NOT xpay, this restriction passes." This is how conditional constraints work in the rune restriction model — the condition only applies when the specified method is being called.
