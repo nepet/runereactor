@@ -3,13 +3,30 @@ use rune_forge::parser::parse_policy;
 use rune_forge::types::Op;
 
 #[test]
-fn test_operator_rf() {
-    let input = include_str!("../../../examples/operator.rf");
+fn test_simple_rf() {
+    let input = include_str!("../../../examples/simple.rf");
     let policy = parse_policy(input).unwrap();
     let rune = compile(&policy).unwrap();
 
-    // tag + allow + 2 when blocks = 4 restrictions
-    assert_eq!(rune.restrictions.len(), 4);
+    // allow = 1 restriction
+    assert_eq!(rune.restrictions.len(), 1);
+
+    // Method whitelist: 3 methods
+    assert_eq!(rune.restrictions[0].alternatives.len(), 3);
+    assert!(rune.restrictions[0]
+        .alternatives
+        .iter()
+        .all(|c| c.field == "method" && c.op == Op::Eq));
+}
+
+#[test]
+fn test_tagged_rf() {
+    let input = include_str!("../../../examples/tagged.rf");
+    let policy = parse_policy(input).unwrap();
+    let rune = compile(&policy).unwrap();
+
+    // tag + allow + 3 when blocks = 5 restrictions
+    assert_eq!(rune.restrictions.len(), 5);
 
     // Tag
     assert_eq!(rune.restrictions[0].alternatives[0].op, Op::Comment);
@@ -32,6 +49,11 @@ fn test_operator_rf() {
     assert_eq!(rune.restrictions[3].alternatives.len(), 3);
     assert_eq!(rune.restrictions[3].alternatives[0].op, Op::Ne);
     assert_eq!(rune.restrictions[3].alternatives[0].value, "xpay");
+
+    // when close: method/close | pnamedestination=bc1q...
+    assert_eq!(rune.restrictions[4].alternatives[0].op, Op::Ne);
+    assert_eq!(rune.restrictions[4].alternatives[0].value, "close");
+    assert_eq!(rune.restrictions[4].alternatives[1].field, "pnamedestination");
 }
 
 #[test]

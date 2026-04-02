@@ -4,7 +4,9 @@ import { compilePolicy, createRune } from "./wasm-bridge.js";
 import "./rf-output.js";
 
 const EXAMPLES: Record<string, string> = {
-  "operator.rf": `tag: operator_id default-operator
+  "simple.rf": `allow methods: listfunds, listpeerchannels, getinfo`,
+  "readonly.rf": `allow methods: listfunds, listpeerchannels, listchannels, listpays, listinvoices, getinfo, waitanyinvoice`,
+  "tagged.rf": `tag: operator_id default-operator
 
 allow methods: listfunds, listpeerchannels, fundchannel, close, invoice, xpay
 
@@ -31,12 +33,11 @@ when close:
 
 global:
   per = 1min`,
-  "readonly.rf": `allow methods: listfunds, listpeerchannels, listchannels, listpays, listinvoices, getinfo, waitanyinvoice`,
 };
 
 @customElement("rf-playground")
 export class RfPlayground extends LitElement {
-  @property() source = EXAMPLES["operator.rf"];
+  @property() source = EXAMPLES["simple.rf"];
   @property() format: "json" | "cln" | "raw" | "rune" = "json";
   @property({ type: Boolean }) readonly = false;
 

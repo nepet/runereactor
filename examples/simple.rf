@@ -1,0 +1,4 @@
+# Simple read-only policy
+# Only allows balance and channel queries — no payments, no state changes.
+
+allow methods: listfunds, listpeerchannels, getinfo

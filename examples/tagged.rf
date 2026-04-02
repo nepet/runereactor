@@ -1,10 +1,5 @@
-# Operator Rune Policy
-#
-# This policy defines the CLN methods an operator can access via commando,
+# This policy defines the CLN methods an operator can access via cln-rpc
 # and the parameter constraints that apply to each method.
-#
-# Compile with: rune-biscuit to-biscuit operator.rf
-# Signed token: rune-biscuit to-biscuit operator.rf --format token --key key.hex
 
 tag: operator_id default-operator
 
@@ -21,5 +16,5 @@ when xpay:
   pnameamount_msat < 1000000001 or pnameamount_msat !
 
 # Restrict channel closes to a known cold wallet address
-# when close:
-#   pnamedestination = bc1qYOUR_COLD_WALLET_ADDRESS_HERE
+when close:
+  pnamedestination = bc1qYOUR_COLD_WALLET_ADDRESS_HERE

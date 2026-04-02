@@ -115,16 +115,16 @@ cargo build --release
 
 ```bash
 # JSON array-of-arrays (default)
-rune-forge examples/operator.rf
+rune-forge examples/tagged.rf
 
 # lightning-cli createrune command
-rune-forge examples/operator.rf --format cln
+rune-forge examples/tagged.rf --format cln
 
 # Raw restriction string
-rune-forge examples/operator.rf --format raw
+rune-forge examples/tagged.rf --format raw
 
 # Read from stdin
-cat examples/operator.rf | rune-forge -
+cat examples/tagged.rf | rune-forge -
 ```
 
 ### Output formats
