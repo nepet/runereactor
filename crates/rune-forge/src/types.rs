@@ -1,5 +1,7 @@
+use serde::Serialize;
+
 /// Rune condition operator — maps 1:1 to futhark's `Condition` enum.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum Op {
     Eq,
     Ne,
@@ -33,6 +35,23 @@ impl Op {
         }
     }
 
+    /// Return a human-readable name for this operator.
+    pub fn name(&self) -> &'static str {
+        match self {
+            Op::Eq => "equal",
+            Op::Ne => "not equal",
+            Op::Missing => "missing",
+            Op::Lt => "less than",
+            Op::Gt => "greater than",
+            Op::LexLt => "lex less than",
+            Op::LexGt => "lex greater than",
+            Op::StartsWith => "starts with",
+            Op::EndsWith => "ends with",
+            Op::Contains => "contains",
+            Op::Comment => "comment",
+        }
+    }
+
     /// Return the single-character symbol for this operator.
     pub fn as_char(&self) -> char {
         match self {
@@ -55,7 +74,7 @@ impl Op {
 ///
 /// For `Op::Missing`, value is empty.
 /// For `Op::Comment`, field is the tag name, value is the tag content.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Condition {
     pub field: String,
     pub op: Op,
@@ -63,7 +82,7 @@ pub struct Condition {
 }
 
 /// A disjunction (OR) of conditions. At least one must pass.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Restriction {
     pub alternatives: Vec<Condition>,
 }
@@ -72,7 +91,7 @@ pub struct Restriction {
 ///
 /// This is the compiled output — a flat CNF representation ready for
 /// conversion to a CLN rune or Biscuit token.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct RunePolicy {
     pub restrictions: Vec<Restriction>,
 }
