@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { compilePolicy } from "./wasm-bridge.js";
+import { compilePolicy, createRune } from "./wasm-bridge.js";
 import "./rf-output.js";
 
 const EXAMPLES: Record<string, string> = {
@@ -37,12 +37,14 @@ global:
 @customElement("rf-playground")
 export class RfPlayground extends LitElement {
   @property() source = EXAMPLES["operator.rf"];
-  @property() format: "json" | "cln" | "raw" = "json";
+  @property() format: "json" | "cln" | "raw" | "rune" = "json";
   @property({ type: Boolean }) readonly = false;
 
   @state() private _output = "";
   @state() private _error = "";
   @state() private _status = "";
+  @state() private _runeOutput = "";
+  @state() private _secret = "0000000000000000000000000000000000000000000000000000000000000000";
   @state() private _debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   static styles = css`
@@ -93,7 +95,7 @@ export class RfPlayground extends LitElement {
           <textarea .value=${this.source} @input=${this._onInput} ?readonly=${this.readonly} spellcheck="false"></textarea>
         </div>
         <div class="pane">
-          <rf-output .output=${this._output} .format=${this.format} .error=${this._error} @format-change=${this._onFormatChange}></rf-output>
+          <rf-output .output=${this._output} .format=${this.format} .error=${this._error} .runeOutput=${this._runeOutput} .secret=${this._secret} @format-change=${this._onFormatChange} @secret-change=${this._onSecretChange}></rf-output>
         </div>
       </div>
       <div class="status">
@@ -114,6 +116,11 @@ export class RfPlayground extends LitElement {
     this._compile();
   }
 
+  private _onSecretChange(e: CustomEvent) {
+    this._secret = e.detail;
+    this._compile();
+  }
+
   private _loadExample(e: Event) {
     const name = (e.target as HTMLSelectElement).value;
     if (EXAMPLES[name]) { this.source = EXAMPLES[name]; this._compile(); }
@@ -121,8 +128,18 @@ export class RfPlayground extends LitElement {
 
   private async _compile() {
     try {
-      this._output = await compilePolicy(this.source, this.format);
+      const fmt = this.format === "rune" ? "raw" : this.format;
+      this._output = await compilePolicy(this.source, fmt);
       this._error = "";
+      if (this.format === "rune") {
+        try {
+          const raw = await compilePolicy(this.source, "raw");
+          this._runeOutput = await createRune(this._secret, raw);
+        } catch (re) {
+          this._runeOutput = "";
+          this._error = String(re);
+        }
+      }
       try {
         const jsonOut = await compilePolicy(this.source, "json");
         const parsed = JSON.parse(jsonOut);
@@ -131,6 +148,7 @@ export class RfPlayground extends LitElement {
     } catch (e) {
       this._error = String(e);
       this._output = "";
+      this._runeOutput = "";
       this._status = `✗ ${this._error}`;
     }
   }
