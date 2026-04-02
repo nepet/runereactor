@@ -324,7 +324,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // Depends on parser (Task 2) being implemented
     fn test_compile_end_to_end_operator_rf() {
         let input = "\
 tag: operator_id default-operator
