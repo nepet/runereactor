@@ -157,6 +157,22 @@ pub fn decode_rune_base64(rune_base64: &str) -> Result<String, String> {
         .map_err(|e| e.to_string())
 }
 
+/// Verify that a base64-encoded rune was derived from the given hex secret.
+#[wasm_bindgen]
+pub fn verify_rune(secret_hex: &str, rune_base64: &str) -> Result<bool, String> {
+    let secret = hex::decode(secret_hex).map_err(|e| format!("invalid hex secret: {}", e))?;
+    let master = Rune::new_master_rune(&secret, vec![], None, None)
+        .map_err(|e| format!("failed to create master rune: {}", e))?;
+    let rune = Rune::from_base64(rune_base64)
+        .map_err(|e| format!("invalid base64 rune: {}", e))?;
+
+    if master.is_authorized(&rune) {
+        Ok(true)
+    } else {
+        Err("rune was not derived from this secret".to_string())
+    }
+}
+
 fn runeauth_condition_to_op(cond: runeauth::Condition) -> (&'static str, &'static str) {
     match cond {
         runeauth::Condition::Missing => ("!", "missing"),

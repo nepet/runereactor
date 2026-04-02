@@ -1,4 +1,4 @@
-use rune_forge_wasm::{create_rune, decode_rune_base64};
+use rune_forge_wasm::{create_rune, decode_rune_base64, verify_rune};
 
 #[test]
 fn create_and_decode_roundtrip() {
@@ -37,5 +37,23 @@ fn create_rune_invalid_secret() {
 #[test]
 fn decode_rune_base64_invalid_input() {
     let result = decode_rune_base64("not-a-valid-rune!!!");
+    assert!(result.is_err());
+}
+
+#[test]
+fn verify_rune_valid() {
+    let secret = "0000000000000000000000000000000000000000000000000000000000000000";
+    let base64_rune = create_rune(secret, "method=listfunds").unwrap();
+    let result = verify_rune(secret, &base64_rune);
+    assert!(result.is_ok());
+    assert!(result.unwrap());
+}
+
+#[test]
+fn verify_rune_wrong_secret() {
+    let secret = "0000000000000000000000000000000000000000000000000000000000000000";
+    let wrong_secret = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+    let base64_rune = create_rune(secret, "method=listfunds").unwrap();
+    let result = verify_rune(wrong_secret, &base64_rune);
     assert!(result.is_err());
 }

@@ -1,6 +1,6 @@
 import { LitElement, html, css, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { decodeRune } from "./wasm-bridge.js";
+import { decodeRune, decodeRuneBase64, verifyRune } from "./wasm-bridge.js";
 
 interface DecodedCondition {
   field: string;
@@ -15,11 +15,19 @@ interface DecodedRune {
   restrictions: DecodedRestriction[];
 }
 
+function looksLikeBase64(s: string): boolean {
+  return s.length >= 44 && /^[A-Za-z0-9_\-+/=]+$/.test(s);
+}
+
 @customElement("rf-decoder")
 export class RfDecoder extends LitElement {
   @state() private _input = "";
   @state() private _decoded: DecodedRune | null = null;
   @state() private _error = "";
+  @state() private _format: "raw" | "base64" | "" = "";
+  @state() private _verifySecret = "";
+  @state() private _verifyResult: "pass" | "fail" | "" = "";
+  @state() private _verifyError = "";
 
   static styles = css`
     :host {
@@ -41,6 +49,9 @@ export class RfDecoder extends LitElement {
       letter-spacing: 0.05em;
       background: #f7f8fa;
       border-bottom: 1px solid #e2e4e8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     textarea {
@@ -140,13 +151,31 @@ export class RfDecoder extends LitElement {
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
+
+    .format-badge { font-size: 0.65rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .format-badge.raw { background: #ebedef; color: #666; }
+    .format-badge.base64 { background: #e0f7ff; color: #0088b3; }
+
+    .verify-section { padding: 0.8rem 1rem; border-top: 1px solid #e2e4e8; background: #f7f8fa; }
+    .verify-title { font-size: 0.7rem; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .verify-row { display: flex; gap: 0.5rem; align-items: center; }
+    .verify-row input { flex: 1; border: 1px solid #e2e4e8; border-radius: 4px; padding: 0.35rem 0.5rem; font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 0.78rem; color: #0c0c0f; outline: none; min-width: 0; }
+    .verify-row input:focus { border-color: #00c3ff; }
+    .verify-btn { background: #0088b3; color: #fff; border: none; border-radius: 4px; padding: 0.35rem 0.8rem; font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .verify-btn:hover { background: #006d91; }
+    .verify-result { margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; }
+    .verify-pass { color: #16a34a; }
+    .verify-fail { color: #dc2626; }
   `;
 
   render() {
     return html`
-      <div class="header">Rune Decoder</div>
+      <div class="header">
+        <span>Rune Decoder</span>
+        ${this._format ? html`<span class="format-badge ${this._format}">${this._format}</span>` : nothing}
+      </div>
       <textarea
-        placeholder="Paste a raw rune string here to decode it..."
+        placeholder="Paste a raw rune string or base64-encoded rune to decode..."
         .value=${this._input}
         @input=${this._onInput}
         spellcheck="false"
@@ -156,6 +185,7 @@ export class RfDecoder extends LitElement {
         : this._decoded
           ? this._renderDecoded()
           : html`<div class="empty">Paste a rune above to see its decoded restrictions.</div>`}
+      ${this._format === "base64" && this._decoded ? this._renderVerify() : nothing}
     `;
   }
 
@@ -188,20 +218,70 @@ export class RfDecoder extends LitElement {
     );
   }
 
+  private _renderVerify() {
+    return html`
+      <div class="verify-section">
+        <div class="verify-title">Verify against secret</div>
+        <div class="verify-row">
+          <input
+            placeholder="Enter hex secret to verify..."
+            .value=${this._verifySecret}
+            @input=${(e: InputEvent) => { this._verifySecret = (e.target as HTMLInputElement).value; this._verifyResult = ""; this._verifyError = ""; }}
+            spellcheck="false"
+          >
+          <button class="verify-btn" @click=${this._verify}>Verify</button>
+        </div>
+        ${this._verifyResult === "pass" ? html`<div class="verify-result verify-pass">&#x2713; Valid &mdash; this rune was derived from the given secret</div>` : nothing}
+        ${this._verifyResult === "fail" ? html`<div class="verify-result verify-fail">&#x2717; Invalid &mdash; ${this._verifyError || "rune does not match this secret"}</div>` : nothing}
+      </div>
+    `;
+  }
+
   private async _onInput(e: InputEvent) {
     this._input = (e.target as HTMLTextAreaElement).value.trim();
+    this._verifyResult = "";
+    this._verifyError = "";
+
     if (!this._input) {
       this._decoded = null;
       this._error = "";
+      this._format = "";
       return;
     }
+
+    if (looksLikeBase64(this._input)) {
+      try {
+        const json = await decodeRuneBase64(this._input);
+        this._decoded = JSON.parse(json) as DecodedRune;
+        this._error = "";
+        this._format = "base64";
+        return;
+      } catch {
+        // Fall through to try raw format
+      }
+    }
+
     try {
       const json = await decodeRune(this._input);
       this._decoded = JSON.parse(json) as DecodedRune;
       this._error = "";
+      this._format = "raw";
     } catch (err) {
       this._decoded = null;
       this._error = String(err);
+      this._format = "";
+    }
+  }
+
+  private async _verify() {
+    if (!this._verifySecret || !this._input) return;
+    try {
+      await verifyRune(this._verifySecret, this._input);
+      this._verifyResult = "pass";
+      this._verifyError = "";
+    } catch (err) {
+      this._verifyResult = "fail";
+      this._verifyError = String(err);
     }
   }
 }
