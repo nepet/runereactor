@@ -1,11 +1,13 @@
-import { LitElement, html, css } from "lit";
+import { LitElement, html, css, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 @customElement("rf-output")
 export class RfOutput extends LitElement {
   @property() output = "";
-  @property() format: "json" | "cln" | "raw" = "json";
+  @property() format: "json" | "cln" | "raw" | "rune" = "json";
   @property() error = "";
+  @property() runeOutput = "";
+  @property() secret = "0000000000000000000000000000000000000000000000000000000000000000";
 
   static styles = css`
     :host { display: block; font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 0.85rem; }
@@ -17,9 +19,14 @@ export class RfOutput extends LitElement {
     .copy-btn:hover { color: #0088b3; }
     .output { padding: 0.8rem; white-space: pre-wrap; word-break: break-all; min-height: 3rem; color: #0c0c0f; }
     .error { color: #dc2626; padding: 0.8rem; white-space: pre-wrap; }
+    .secret-row { display: flex; gap: 0.5rem; align-items: center; padding: 0.4rem 0.8rem; border-bottom: 1px solid #e2e4e8; background: #f7f8fa; font-size: 0.75rem; }
+    .secret-row label { color: #666; white-space: nowrap; font-family: system-ui, -apple-system, sans-serif; text-transform: none; letter-spacing: normal; }
+    .secret-row input { flex: 1; border: 1px solid #e2e4e8; border-radius: 4px; padding: 0.25rem 0.4rem; font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 0.75rem; color: #0c0c0f; outline: none; min-width: 0; }
+    .secret-row input:focus { border-color: #00c3ff; }
+    .secret-row .hint { color: #999; font-size: 0.65rem; font-family: system-ui, -apple-system, sans-serif; text-transform: none; letter-spacing: normal; }
   `;
 
-  private _formats: Array<"json" | "cln" | "raw"> = ["json", "cln", "raw"];
+  private _formats: Array<"json" | "cln" | "raw" | "rune"> = ["json", "cln", "raw", "rune"];
 
   render() {
     return html`
@@ -29,18 +36,31 @@ export class RfOutput extends LitElement {
         `)}
         <button class="copy-btn" @click=${this._copy}>📋 Copy</button>
       </div>
+      ${this.format === "rune" ? html`
+        <div class="secret-row">
+          <label>Secret (hex)</label>
+          <input .value=${this.secret} @input=${this._onSecretInput} spellcheck="false" placeholder="64-char hex secret">
+          <span class="hint">client-side only</span>
+        </div>
+      ` : nothing}
       ${this.error
         ? html`<div class="error">${this.error}</div>`
-        : html`<div class="output">${this.output}</div>`}
+        : html`<div class="output">${this.format === "rune" ? this.runeOutput : this.output}</div>`}
     `;
   }
 
-  private _setFormat(f: "json" | "cln" | "raw") {
+  private _setFormat(f: "json" | "cln" | "raw" | "rune") {
     this.format = f;
     this.dispatchEvent(new CustomEvent("format-change", { detail: f, bubbles: true }));
   }
 
+  private _onSecretInput(e: InputEvent) {
+    this.secret = (e.target as HTMLInputElement).value;
+    this.dispatchEvent(new CustomEvent("secret-change", { detail: this.secret, bubbles: true }));
+  }
+
   private async _copy() {
-    if (this.output) { await navigator.clipboard.writeText(this.output); }
+    const text = this.format === "rune" ? this.runeOutput : this.output;
+    if (text) { await navigator.clipboard.writeText(text); }
   }
 }
