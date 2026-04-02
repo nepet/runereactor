@@ -114,13 +114,6 @@ pub fn create_rune(secret_hex: &str, restrictions_raw: &str) -> Result<String, S
 /// Decode a base64-encoded rune into a JSON restriction breakdown.
 #[wasm_bindgen]
 pub fn decode_rune_base64(rune_base64: &str) -> Result<String, String> {
-    // Validate the rune parses correctly.
-    Rune::from_base64(rune_base64)
-        .map_err(|e| format!("invalid base64 rune: {}", e))?;
-
-    // Extract the restriction string portion from the rune's string representation.
-    // Rune::to_string() yields "[64-hex-authcode]:[restrictions]".
-    // We re-parse via from_base64 and then decode to_string to get restriction text.
     let rune = Rune::from_base64(rune_base64)
         .map_err(|e| format!("invalid base64 rune: {}", e))?;
     let rune_str = rune.to_string();

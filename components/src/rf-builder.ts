@@ -512,8 +512,7 @@ export class RfBuilder extends LitElement {
       this._error = "";
       if (this._outputFormat === "rune") {
         try {
-          const raw = await compilePolicy(this._rfSource, "raw");
-          this._runeOutput = await createRune(this._secret, raw);
+          this._runeOutput = await createRune(this._secret, this._output);
         } catch (re) {
           this._runeOutput = "";
           this._error = String(re);
