@@ -83,11 +83,18 @@ nav {
   font-size: 1.25rem;
   font-weight: 700;
   color: $text;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 
   &:hover {
     text-decoration: none;
     color: $primary-dark;
   }
+}
+
+.logo-icon {
+  flex-shrink: 0;
 }
 
 .nav-links {
