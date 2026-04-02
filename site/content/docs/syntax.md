@@ -89,6 +89,44 @@ All 11 rune condition operators are supported:
 | `~` | Contains | Field value contains string | `pnamedesc ~ test` |
 | `#` | Comment | Always passes (used for tags) | `#purpose=payments` |
 
+## Fields
+
+Core Lightning checks these fields when evaluating rune restrictions:
+
+### Built-in Fields
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `time` | Current UNIX timestamp | `time < 1656759180` |
+| `id` | Node ID of the peer using the rune | `id = 024b9a1fa8e...` |
+| `method` | The command being run | `method = withdraw` |
+| `per` | Rate limit interval. Supports suffixes: `msec`, `usec`, `nsec`, `sec` (default), `min`, `hour`, `day` | `per = 5sec` |
+| `rate` | Rate limit per minute. `rate=60` is equivalent to `per=1sec` | `rate = 10` |
+| `pnum` | Number of parameters passed to the command | `pnum < 2` |
+
+### Parameter Fields
+
+| Prefix | Description | Example |
+|--------|-------------|---------|
+| `pnameX` | Named parameter `X`. Use the actual parameter name, e.g. `pnamedestination` for the `destination` parameter | `pnamedestination = bc1q...` |
+| `parrN` | The N-th positional parameter (zero-indexed) | `parr0 = bc1q...` |
+| `pinvX_N` | Parse parameter `X` as a bolt11/bolt12 invoice and extract field `N`. Valid subfields: `amount`, `description`, `node` | `pinvinvstring_amount < 1000000` |
+
+### Common Parameter Names
+
+These are frequently used `pname` fields in CLN commands:
+
+- `pnameamount_msat` — payment amount in millisatoshis
+- `pnamedestination` — destination address or node ID
+- `pnamedescription` — invoice description
+- `pnamelabel` — label for invoices/payments
+- `pnameinvstring` — invoice string (bolt11/bolt12)
+- `pnamebolt11` — bolt11 invoice string
+- `pnamechannel_id` — channel identifier
+- `pnameamount` — amount in satoshis (e.g. for `fundchannel`)
+
+> **Note:** Prior to CLN v24.05, underscores had to be removed from parameter names (e.g. `pnameamountmsat` instead of `pnameamount_msat`). This is no longer required.
+
 ## Expressions
 
 Inside `when` and `global` blocks, each indented line is a **condition**. A condition consists of a field name, an operator, and (optionally) a value.
