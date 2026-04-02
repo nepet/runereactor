@@ -47,6 +47,7 @@ export class RfPlayground extends LitElement {
   @state() private _runeOutput = "";
   @state() private _secret = "0000000000000000000000000000000000000000000000000000000000000000";
   @state() private _debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  @state() private _shareMsg = "";
 
   static styles = css`
     :host { display: block; border: 1px solid #e2e4e8; border-radius: 8px; overflow: hidden; background: #fff; }
@@ -54,6 +55,9 @@ export class RfPlayground extends LitElement {
     .toolbar select { background: #fff; border: 1px solid #e2e4e8; border-radius: 4px; color: #0c0c0f; padding: 0.2rem 0.4rem; font-size: 0.75rem; }
     .toolbar button { background: #00c3ff; border: none; color: #fff; border-radius: 4px; padding: 0.25rem 0.7rem; font-size: 0.75rem; cursor: pointer; font-weight: 600; }
     .toolbar button:hover { background: #0088b3; }
+    .share-wrap { position: relative; }
+    .share-toast { position: absolute; top: 110%; right: 0; background: #333; color: #fff; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.65rem; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
+    .share-toast.visible { opacity: 1; }
     .editor-split { display: flex; min-height: 200px; }
     .pane { flex: 1; display: flex; flex-direction: column; }
     .pane + .pane { border-left: 1px solid #e2e4e8; }
@@ -88,7 +92,10 @@ export class RfPlayground extends LitElement {
             ${Object.keys(EXAMPLES).map(name => html`<option value=${name}>${name}</option>`)}
           </select>
         </div>
-        <button @click=${this._share}>Share</button>
+        <div class="share-wrap">
+          <button @click=${this._share} title="Copy a shareable URL with the current policy">Share</button>
+          <span class="share-toast ${this._shareMsg ? "visible" : ""}">${this._shareMsg}</span>
+        </div>
       </div>
       <div class="editor-split">
         <div class="pane">
@@ -153,9 +160,11 @@ export class RfPlayground extends LitElement {
     }
   }
 
-  private _share() {
+  private async _share() {
     const hash = `#policy=${encodeURIComponent(this.source)}`;
     window.location.hash = hash;
-    navigator.clipboard.writeText(window.location.href);
+    await navigator.clipboard.writeText(window.location.href);
+    this._shareMsg = "Shareable URL copied to clipboard";
+    setTimeout(() => { this._shareMsg = ""; }, 2000);
   }
 }
