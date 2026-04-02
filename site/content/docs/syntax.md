@@ -37,7 +37,7 @@ tag: purpose channel-management
 tag: version 2
 ```
 
-Compiles to: `#purpose=channel-management`, `#version=2`
+Compiles to: `purpose#channel-management`, `version#2`
 
 ### allow methods
 
@@ -87,7 +87,7 @@ All 11 rune condition operators are supported:
 | `^` | Starts with | Field value starts with string | `method ^ list` |
 | `$` | Ends with | Field value ends with string | `pnamedest $ xyz` |
 | `~` | Contains | Field value contains string | `pnamedesc ~ test` |
-| `#` | Comment | Always passes (used for tags) | `#purpose=payments` |
+| `#` | Comment | Always passes (used for tags) | `purpose#payments` |
 
 ## Fields
 
