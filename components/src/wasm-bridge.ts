@@ -6,6 +6,8 @@ interface RuneForgeWasm {
   parse_policy(source: string): string;
   decode_rune(raw: string): string;
   generate_policy_from_spec(spec: string): string;
+  create_rune(secret_hex: string, restrictions_raw: string): string;
+  decode_rune_base64(rune_base64: string): string;
 }
 
 type WasmState =
@@ -28,6 +30,8 @@ async function loadWasm(): Promise<void> {
       parse_policy: glue.parse_policy,
       decode_rune: glue.decode_rune,
       generate_policy_from_spec: glue.generate_policy_from_spec,
+      create_rune: glue.create_rune,
+      decode_rune_base64: glue.decode_rune_base64,
     },
   };
 }
@@ -64,4 +68,12 @@ export function decodeRune(raw: string): Promise<string> {
 
 export function generatePolicy(spec: string): Promise<string> {
   return ensureWasm().then((w) => w.generate_policy_from_spec(spec));
+}
+
+export function createRune(secretHex: string, restrictionsRaw: string): Promise<string> {
+  return ensureWasm().then((w) => w.create_rune(secretHex, restrictionsRaw));
+}
+
+export function decodeRuneBase64(runeBase64: string): Promise<string> {
+  return ensureWasm().then((w) => w.decode_rune_base64(runeBase64));
 }
