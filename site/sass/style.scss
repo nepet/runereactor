@@ -134,7 +134,7 @@ main {
 // --- Hero ---
 .hero {
   text-align: center;
-  padding: 4rem 1.5rem 2rem;
+  padding: 4rem 1.5rem 1.5rem;
   max-width: $max-width;
   margin: 0 auto;
 
@@ -149,13 +149,20 @@ main {
     font-size: 1.25rem;
     color: $text-secondary;
     line-height: 1.5;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
   }
 
-  .ecosystem {
-    font-size: 0.9rem;
+  .hero-sub {
+    font-size: 1rem;
     color: $text-tertiary;
-    font-weight: 500;
+    line-height: 1.5;
+
+    code {
+      background: $bg-editor;
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+      font-size: 0.875em;
+    }
   }
 }
 
@@ -163,27 +170,65 @@ main {
 .demo {
   max-width: $max-width;
   margin: 0 auto;
-  padding: 1rem 1.5rem 3rem;
+  padding: 1rem 1.5rem 2rem;
+
+  .section-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $text-secondary;
+    margin-bottom: 0.75rem;
+  }
 }
 
-// --- Features ---
-.features {
+.demo-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 0 0.25rem;
+}
+
+.trust-line {
+  font-size: 0.85rem;
+  color: $text-tertiary;
+}
+
+.demo-cta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $primary-dark;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// --- Tools ---
+.tools {
   max-width: $max-width;
   margin: 0 auto;
   padding: 0 1.5rem 4rem;
 }
 
-.feature-grid {
+.tool-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
-.feature-card {
+.tool-card {
+  display: block;
   background: $bg-surface;
   border: 1px solid $border;
   border-radius: $radius;
   padding: 1.5rem;
+  color: $text;
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: $primary;
+    text-decoration: none;
+  }
 
   h3 {
     font-size: 1.1rem;
@@ -195,6 +240,13 @@ main {
     font-size: 0.95rem;
     color: $text-secondary;
     line-height: 1.5;
+  }
+
+  code {
+    background: $bg-editor;
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+    font-size: 0.875em;
   }
 }
 
@@ -337,8 +389,14 @@ footer {
     font-size: 1.05rem;
   }
 
-  .feature-grid {
+  .tool-grid {
     grid-template-columns: 1fr;
+  }
+
+  .demo-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
   }
 
   .nav-links {
