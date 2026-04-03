@@ -22,22 +22,45 @@ Writing CLN rune restrictions by hand is tedious and error-prone, especially whe
 A policy file consists of directives:
 
 ```bash
-# Restrict this rune to a specific peer
+# Read-only access for a monitoring bot
+allow methods: ^list, ^get, summary
+
+# Deny listdatastore — stores sensitive data
+global:
+  method / listdatastore
+```
+
+A spending-limited payment rune:
+
+```bash
+allow methods: listfunds, getinfo, xpay
+
+when xpay:
+  pnameamount_msat < 100000000 or pnameamount_msat !
+  rate = 10
+```
+
+A full operator policy with peer restriction, tags, and rate limiting:
+
+```bash
 id: 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605
 
-# Metadata visible in showrunes output
-tag: purpose channel-management
+tag: role channel-operator
 tag: version 1
 
-allow methods: listfunds, listpeerchannels, fundchannel, close
+allow methods: ^list, getinfo, fundchannel, close, xpay
 
-# Fund channels up to 1,000,000 sats
 when fundchannel:
   pnameamount < 1000001
 
-# Only allow closing to a known cold wallet
+when xpay:
+  (pnameamount_msat < 100000000 or pnameamount_msat !) and rate = 10
+
 when close:
   pnamedestination = bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+
+global:
+  per = 1min
 ```
 
 ### Directives
@@ -115,16 +138,16 @@ cargo build --release
 
 ```bash
 # JSON array-of-arrays (default)
-rune-reactor examples/tagged.rf
+rune-reactor examples/payments.rf
 
 # lightning-cli createrune command
-rune-reactor examples/tagged.rf --format cln
+rune-reactor examples/payments.rf --format cln
 
 # Raw restriction string
-rune-reactor examples/tagged.rf --format raw
+rune-reactor examples/payments.rf --format raw
 
 # Read from stdin
-cat examples/tagged.rf | rune-reactor -
+cat examples/payments.rf | rune-reactor -
 ```
 
 ### Output formats
