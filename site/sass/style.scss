@@ -152,6 +152,13 @@ main {
     margin-bottom: 0.5rem;
   }
 
+  .hero-context {
+    font-size: 1.05rem;
+    color: $text-secondary;
+    line-height: 1.5;
+    margin-bottom: 0.4rem;
+  }
+
   .hero-sub {
     font-size: 1rem;
     color: $text-tertiary;
@@ -247,6 +254,23 @@ main {
     padding: 0.15em 0.4em;
     border-radius: 3px;
     font-size: 0.875em;
+  }
+}
+
+// --- Docs Callout ---
+.docs-callout {
+  max-width: $max-width;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+  text-align: center;
+
+  p {
+    font-size: 0.95rem;
+    color: $text-tertiary;
+  }
+
+  a {
+    font-weight: 600;
   }
 }
 
