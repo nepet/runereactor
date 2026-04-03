@@ -282,7 +282,7 @@ export class RfBuilder extends LitElement {
       <div class="section">
         <div class="section-title">Allowed Methods</div>
         <div class="row">
-          <input class="wide" placeholder="Comma-separated, e.g. listfunds, xpay, invoice" .value=${this._methods} @input=${(e: InputEvent) => { this._methods = (e.target as HTMLInputElement).value; this._generate(); }}>
+          <input class="wide" placeholder="e.g. listfunds, xpay, ^list, ~fund" .value=${this._methods} @input=${(e: InputEvent) => { this._methods = (e.target as HTMLInputElement).value; this._generate(); }}>
         </div>
       </div>
 
@@ -462,10 +462,17 @@ export class RfBuilder extends LitElement {
   }
 
   private async _generate() {
+    const METHOD_OPS = ["^", "$", "~"];
     const methods = this._methods
       .split(",")
       .map(m => m.trim())
-      .filter(m => m.length > 0);
+      .filter(m => m.length > 0)
+      .map(m => {
+        if (m.length > 1 && METHOD_OPS.includes(m[0])) {
+          return { op: m[0], value: m.slice(1) };
+        }
+        return { op: "=", value: m };
+      });
 
     const spec: Record<string, unknown> = {
       tag: this._tagField || this._tagValue
