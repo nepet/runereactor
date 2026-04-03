@@ -84,6 +84,8 @@ nav {
   font-weight: 700;
   color: $text;
   display: flex;
+  align-items: center;
+  gap: 0.4rem;
 
   &:hover {
     text-decoration: none;
@@ -91,11 +93,12 @@ nav {
   }
 }
 
-.logo-rune {
-  font-size: 1.6rem;
-  vertical-align: middle;
-  line-height: 1;
+.logo-icon {
+  width: 1.6em;
+  height: 1.6em;
 }
+
+
 
 
 .nav-links {
@@ -143,6 +146,16 @@ main {
     font-weight: 700;
     letter-spacing: -0.02em;
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+  }
+
+  .hero-icon {
+    width: 1.2em;
+    height: 1.2em;
+    transform: translateY(0.05em);
   }
 
   .tagline {
