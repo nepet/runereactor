@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "crates/rune-forge",
-    "crates/rune-forge-wasm",
+    "crates/rune-reactor",
+    "crates/rune-reactor-wasm",
 ]
 resolver = "2"

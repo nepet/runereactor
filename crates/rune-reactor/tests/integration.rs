@@ -1,6 +1,6 @@
-use rune_forge::compiler::compile;
-use rune_forge::parser::parse_policy;
-use rune_forge::types::Op;
+use rune_reactor::compiler::compile;
+use rune_reactor::parser::parse_policy;
+use rune_reactor::types::Op;
 
 #[test]
 fn test_simple_rf() {

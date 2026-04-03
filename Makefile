@@ -5,9 +5,9 @@ build: wasm components site
 
 # Build WASM crate
 wasm:
-	wasm-pack build crates/rune-forge-wasm --target web --release
-	cp crates/rune-forge-wasm/pkg/rune_forge_wasm_bg.wasm site/static/
-	cp crates/rune-forge-wasm/pkg/rune_forge_wasm.js site/static/
+	wasm-pack build crates/rune-reactor-wasm --target web --release
+	cp crates/rune-reactor-wasm/pkg/rune_reactor_wasm_bg.wasm site/static/
+	cp crates/rune-reactor-wasm/pkg/rune_reactor_wasm.js site/static/
 
 # Build Lit components
 components:
@@ -36,4 +36,4 @@ clean:
 	rm -rf site/public
 	rm -rf components/dist
 	rm -f site/static/*.wasm site/static/*.js
-	rm -rf crates/rune-forge-wasm/pkg
+	rm -rf crates/rune-reactor-wasm/pkg

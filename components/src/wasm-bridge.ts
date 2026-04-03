@@ -1,7 +1,7 @@
-// WASM bridge — lazy-loads the rune-forge WASM module and wraps exports.
+// WASM bridge — lazy-loads the rune-reactor WASM module and wraps exports.
 // All components share a single WASM instance via this module.
 
-interface RuneForgeWasm {
+interface RuneReactorWasm {
   compile_policy(source: string, format: string): string;
   parse_policy(source: string): string;
   decode_rune(raw: string): string;
@@ -14,14 +14,14 @@ interface RuneForgeWasm {
 type WasmState =
   | { status: "idle" }
   | { status: "loading"; promise: Promise<void> }
-  | { status: "ready"; wasm: RuneForgeWasm }
+  | { status: "ready"; wasm: RuneReactorWasm }
   | { status: "error"; error: string };
 
 let state: WasmState = { status: "idle" };
 
 async function loadWasm(): Promise<void> {
-  const wasmUrl = new URL("rune_forge_wasm_bg.wasm", import.meta.url).href;
-  const glueUrl = new URL("rune_forge_wasm.js", import.meta.url).href;
+  const wasmUrl = new URL("rune_reactor_wasm_bg.wasm", import.meta.url).href;
+  const glueUrl = new URL("rune_reactor_wasm.js", import.meta.url).href;
   const glue = await import(/* @vite-ignore */ glueUrl);
   await glue.default(wasmUrl);
   state = {
@@ -38,7 +38,7 @@ async function loadWasm(): Promise<void> {
   };
 }
 
-export async function ensureWasm(): Promise<RuneForgeWasm> {
+export async function ensureWasm(): Promise<RuneReactorWasm> {
   if (state.status === "ready") return state.wasm;
   if (state.status === "error") throw new Error(state.error);
   if (state.status === "loading") {

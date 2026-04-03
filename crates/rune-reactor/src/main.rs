@@ -3,9 +3,9 @@ use std::io::Read as _;
 use anyhow::{Context, Result};
 use clap::{Parser, ValueEnum};
 
-use rune_forge::compiler::compile;
-use rune_forge::parser::parse_policy;
-use rune_forge::types::Op;
+use rune_reactor::compiler::compile;
+use rune_reactor::parser::parse_policy;
+use rune_reactor::types::Op;
 
 #[derive(Clone, Debug, ValueEnum)]
 enum Format {
@@ -19,7 +19,7 @@ enum Format {
 
 #[derive(Parser, Debug)]
 #[command(
-    name = "rune-forge",
+    name = "rune-reactor",
     about = "Compile .rf rune policies into CLN rune restrictions"
 )]
 struct Cli {
@@ -43,7 +43,7 @@ fn read_input(path: &str) -> Result<String> {
     }
 }
 
-fn condition_to_string(c: &rune_forge::types::Condition) -> String {
+fn condition_to_string(c: &rune_reactor::types::Condition) -> String {
     if c.op == Op::Missing {
         format!("{}{}", c.field, c.op.as_char())
     } else {

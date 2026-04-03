@@ -1,4 +1,4 @@
-use rune_forge_wasm::{create_rune, decode_rune_base64, verify_rune};
+use rune_reactor_wasm::{create_rune, decode_rune_base64, verify_rune};
 
 #[test]
 fn create_and_decode_roundtrip() {

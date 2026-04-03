@@ -1,4 +1,4 @@
-// rune-forge site styles
+// rune-reactor site styles
 // Light theme — Blockstream/CLN ecosystem colors
 
 // --- Variables ---
@@ -84,8 +84,6 @@ nav {
   font-weight: 700;
   color: $text;
   display: flex;
-  align-items: center;
-  gap: 0.35rem;
 
   &:hover {
     text-decoration: none;
@@ -93,9 +91,12 @@ nav {
   }
 }
 
-.logo-icon {
-  flex-shrink: 0;
+.logo-rune {
+  font-size: 1.6rem;
+  vertical-align: middle;
+  line-height: 1;
 }
+
 
 .nav-links {
   display: flex;

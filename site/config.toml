@@ -1,5 +1,5 @@
-base_url = "https://nepet.github.io/rune-forge"
-title = "rune-forge"
+base_url = "https://runereactor.dev"
+title = "rune-reactor"
 description = "Write human-readable policies for Core Lightning runes"
 compile_sass = true
 build_search_index = false

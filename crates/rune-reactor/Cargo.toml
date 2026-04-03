@@ -1,15 +1,15 @@
 [package]
-name = "rune-forge"
+name = "rune-reactor"
 version = "0.1.0"
 edition = "2021"
 description = "Compile human-readable .rf rune policies into CLN rune restrictions"
 
 [lib]
-name = "rune_forge"
+name = "rune_reactor"
 path = "src/lib.rs"
 
 [[bin]]
-name = "rune-forge"
+name = "rune-reactor"
 path = "src/main.rs"
 
 [dependencies]

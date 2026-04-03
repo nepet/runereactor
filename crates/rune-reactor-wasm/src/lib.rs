@@ -1,10 +1,10 @@
 use wasm_bindgen::prelude::*;
 
-use rune_forge::compiler;
-use rune_forge::decoder;
-use rune_forge::generator;
-use rune_forge::parser;
-use rune_forge::types::Op;
+use rune_reactor::compiler;
+use rune_reactor::decoder;
+use rune_reactor::generator;
+use rune_reactor::parser;
+use rune_reactor::types::Op;
 use runeauth::{Rune, Restriction as RuneauthRestriction};
 
 /// Compile a .rf policy source to the specified output format.

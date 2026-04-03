@@ -108,7 +108,7 @@ export class RfPlayground extends LitElement {
       </div>
       <div class="status">
         <span class=${this._error ? "status-err" : "status-ok"}>${this._status}</span>
-        <span class="status-version">rune-forge v0.1.0 (WASM)</span>
+        <span class="status-version">rune-reactor v0.1.0 (WASM)</span>
       </div>
     `;
   }

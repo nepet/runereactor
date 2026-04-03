@@ -605,7 +605,7 @@ when xpay:
     fn test_parse_advanced_rf() {
         let input = r#"# Advanced Operator Policy — demonstrating AND-within-OR
 #
-# This showcases the negation bypass + CNF distribution that rune-forge
+# This showcases the negation bypass + CNF distribution that rune-reactor
 # automates. Without the tool, constructing these by hand is error-prone.
 
 # Restrict to a specific commando peer (enforcing — peer must match this pubkey)

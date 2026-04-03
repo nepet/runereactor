@@ -20,7 +20,7 @@
         <nav>
             <div class="nav-inner">
                 <a href="{{ get_url(path='/') }}" class="logo"
-                    ><svg class="logo-icon" width="18" height="20" viewBox="0 0 18 24" fill="currentColor"><path d="M11 0L0 14h7L5 24l13-16h-7z"/></svg> rune-forge</a
+                    ><span class="logo-rune">ᛏ</span> rune-reactor</
                 >
                 <div class="nav-links">
                     <a href="{{ get_url(path='playground') }}">Playground</a>
@@ -28,7 +28,7 @@
                     <a href="{{ get_url(path='builder') }}">Builder</a>
                     <a href="{{ get_url(path='docs') }}">Docs</a>
                     <a
-                        href="https://github.com/nepet/rune-forge"
+                        href="https://github.com/nepet/rune-reactor"
                         class="nav-github"
                         aria-label="GitHub repository"
                     >
@@ -48,7 +48,7 @@
         </nav>
         <main>{% block content %}{% endblock %}</main>
         <footer>
-            <p>rune-forge v{{ config.extra.version }}</p>
+            <p>rune-reactor v{{ config.extra.version }}</p>
             <p class="footer-links">
                 <a href="https://github.com/rustyrussell/runes"
                     >Original Runes Implementation</a
@@ -56,7 +56,7 @@
                 <span class="sep">&middot;</span>
                 <a href="https://github.com/nepet/futhark">futhark</a>
                 <span class="sep">&middot;</span>
-                <a href="https://github.com/nepet/rune-forge">Source</a>
+                <a href="https://github.com/nepet/rune-reactor">Source</a>
             </p>
         </footer>
     </body>

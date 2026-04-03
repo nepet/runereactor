@@ -1,15 +1,15 @@
-# rune-forge
+# rune-reactor
 
 Compile human-readable `.rf` policy files into [CLN rune](https://docs.corelightning.org/docs/runes) restrictions.
 
 ## What it does
 
-Writing CLN rune restrictions by hand is tedious and error-prone, especially when you need conditional constraints, method whitelists, and rate limits. rune-forge lets you express authorization policies in a readable format and compiles them into the restriction arrays that `lightning-cli createrune` expects.
+Writing CLN rune restrictions by hand is tedious and error-prone, especially when you need conditional constraints, method whitelists, and rate limits. rune-reactor lets you express authorization policies in a readable format and compiles them into the restriction arrays that `lightning-cli createrune` expects.
 
 ```
                   .rf policy
                       |
-                  [rune-forge]
+                  [rune-reactor]
                       |
           +-----------+-----------+
           |           |           |
@@ -115,16 +115,16 @@ cargo build --release
 
 ```bash
 # JSON array-of-arrays (default)
-rune-forge examples/tagged.rf
+rune-reactor examples/tagged.rf
 
 # lightning-cli createrune command
-rune-forge examples/tagged.rf --format cln
+rune-reactor examples/tagged.rf --format cln
 
 # Raw restriction string
-rune-forge examples/tagged.rf --format raw
+rune-reactor examples/tagged.rf --format raw
 
 # Read from stdin
-cat examples/tagged.rf | rune-forge -
+cat examples/tagged.rf | rune-reactor -
 ```
 
 ### Output formats
@@ -132,27 +132,27 @@ cat examples/tagged.rf | rune-forge -
 **JSON** (default) — ready for programmatic use or piping to other tools:
 
 ```bash
-$ rune-forge policy.rf --format json
+$ rune-reactor policy.rf --format json
 [["method=listfunds","method=xpay"],["method/xpay","pnameamount_msat<1000000001"]]
 ```
 
 **CLN** — paste directly into your terminal:
 
 ```bash
-$ rune-forge policy.rf --format cln
+$ rune-reactor policy.rf --format cln
 lightning-cli createrune -k "restrictions"='[["method=listfunds","method=xpay"],["method/xpay","pnameamount_msat<1000000001"]]'
 ```
 
 **Raw** — the restriction string as used in the rune wire format (`|` separates alternatives, `&` separates restrictions):
 
 ```bash
-$ rune-forge policy.rf --format raw
+$ rune-reactor policy.rf --format raw
 method=listfunds|method=xpay&method/xpay|pnameamount_msat<1000000001
 ```
 
 ## How It Works
 
-rune-forge compiles `.rf` policies in two phases:
+rune-reactor compiles `.rf` policies in two phases:
 
 1. **Parse** — the `.rf` text is parsed into an AST of directives and expression trees
 2. **Compile** — the AST is flattened into a `RunePolicy` (conjunction of restrictions in CNF)
@@ -165,11 +165,11 @@ Key transformations the compiler performs:
 
 ## Library Usage
 
-rune-forge is also a library crate:
+rune-reactor is also a library crate:
 
 ```rust
-use rune_forge::parser::parse_policy;
-use rune_forge::compiler::compile;
+use rune_reactor::parser::parse_policy;
+use rune_reactor::compiler::compile;
 
 let input = r#"
 allow methods: listfunds, xpay
