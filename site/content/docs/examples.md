@@ -12,7 +12,7 @@ Each example below includes an interactive editor — modify the policy and see 
 
 The most basic policy — just allow a few methods with no additional constraints.
 
-<rf-playground format="json" source="allow methods: listfunds, listpeerchannels, getinfo"></rf-playground>
+<rf-playground minimal format="json" source="allow methods: listfunds, listpeerchannels, getinfo"></rf-playground>
 
 This policy:
 - Allows only three read-only methods: `listfunds`, `listpeerchannels`, and `getinfo`
@@ -22,7 +22,7 @@ This policy:
 
 This is equivalent to Core Lightning's built-in `readonly` restriction — using prefix matching and a deny to exclude sensitive data.
 
-<rf-playground format="cln" source="allow methods: ^list, ^get, summary&#10;&#10;global:&#10;  method / listdatastore"></rf-playground>
+<rf-playground minimal format="cln" source="allow methods: ^list, ^get, summary&#10;&#10;global:&#10;  method / listdatastore"></rf-playground>
 
 This policy:
 - Allows any method starting with `list` or `get`, plus `summary` — using the `^` prefix operator
@@ -33,7 +33,7 @@ This policy:
 
 A policy with tags, method whitelisting, and conditional constraints on specific methods.
 
-<rf-playground format="json" source="tag: operator_id default-operator&#10;&#10;allow methods: listfunds, listpeerchannels, fundchannel, close, invoice, xpay&#10;&#10;when fundchannel:&#10;  pnameamount < 1000001&#10;&#10;when xpay:&#10;  pnameamount_msat < 1000000001 or pnameamount_msat !"></rf-playground>
+<rf-playground minimal format="json" source="tag: operator_id default-operator&#10;&#10;allow methods: listfunds, listpeerchannels, fundchannel, close, invoice, xpay&#10;&#10;when fundchannel:&#10;  pnameamount < 1000001&#10;&#10;when xpay:&#10;  pnameamount_msat < 1000000001 or pnameamount_msat !"></rf-playground>
 
 This policy:
 - Tags the rune with an operator ID for auditing
@@ -45,7 +45,7 @@ This policy:
 
 A more complex policy that combines peer restriction, method whitelisting, conditional constraints, and global rate limiting.
 
-<rf-playground format="raw" source="id: 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605&#10;&#10;tag: purpose channel-management&#10;tag: version 1&#10;&#10;allow methods: listfunds, listpeerchannels, fundchannel, close&#10;&#10;when fundchannel:&#10;  pnameamount < 1000001&#10;&#10;when close:&#10;  pnamedestination = bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh&#10;&#10;global:&#10;  rate = 10"></rf-playground>
+<rf-playground minimal format="raw" source="id: 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605&#10;&#10;tag: purpose channel-management&#10;tag: version 1&#10;&#10;allow methods: listfunds, listpeerchannels, fundchannel, close&#10;&#10;when fundchannel:&#10;  pnameamount < 1000001&#10;&#10;when close:&#10;  pnamedestination = bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh&#10;&#10;global:&#10;  rate = 10"></rf-playground>
 
 This policy:
 - Restricts the rune to a specific commando peer (by node public key)
