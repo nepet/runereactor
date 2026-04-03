@@ -5,7 +5,12 @@ import "./rf-output.js";
 
 const EXAMPLES: Record<string, string> = {
   "simple.rf": `allow methods: listfunds, listpeerchannels, getinfo`,
-  "readonly.rf": `allow methods: ^list, getinfo, waitanyinvoice`,
+  "readonly.rf": `# CLN's built-in readonly pattern
+allow methods: ^list, ^get, summary
+
+# Deny listdatastore — it contains sensitive data
+global:
+  method / listdatastore`,
   "tagged.rf": `tag: operator_id default-operator
 
 allow methods: listfunds, listpeerchannels, fundchannel, close, invoice, xpay

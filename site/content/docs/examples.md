@@ -18,15 +18,16 @@ This policy:
 - Allows only three read-only methods: `listfunds`, `listpeerchannels`, and `getinfo`
 - No tags, no constraints — the simplest possible rune policy
 
-## Read-Only Access with Tags
+## Read-Only Access (CLN pattern)
 
-Grant a rune that can only call read-only methods, with metadata tags for auditing.
+This is equivalent to Core Lightning's built-in `readonly` restriction — using prefix matching and a deny to exclude sensitive data.
 
-<rf-playground format="cln" source="tag: purpose monitoring&#10;tag: version 1&#10;&#10;allow methods: listfunds, listpeerchannels, listnodes, listchannels"></rf-playground>
+<rf-playground format="cln" source="allow methods: ^list, ^get, summary&#10;&#10;global:&#10;  method / listdatastore"></rf-playground>
 
 This policy:
-- Tags the rune with a purpose and version (visible in `showrunes` output)
-- Restricts to four read-only methods — the holder cannot modify any node state
+- Allows any method starting with `list` or `get`, plus `summary` — using the `^` prefix operator
+- Denies `listdatastore` via a global restriction (it contains sensitive data)
+- Two restrictions work together: the allow (OR'd) and the deny (AND'd)
 
 ## Tagged Operator Policy
 
