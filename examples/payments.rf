@@ -1,0 +1,5 @@
+allow methods: listfunds, getinfo, xpay
+
+when xpay:
+  pnameamount_msat < 100000000 or pnameamount_msat !
+  rate = 10

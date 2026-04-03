@@ -1,0 +1,6 @@
+# Read-only access for a monitoring bot
+allow methods: ^list, ^get, summary
+
+# Deny listdatastore — stores sensitive data
+global:
+  method / listdatastore

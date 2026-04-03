@@ -4,37 +4,32 @@ import { compilePolicy, createRune } from "./wasm-bridge.js";
 import "./rf-output.js";
 
 const EXAMPLES: Record<string, string> = {
-  "simple.rf": `allow methods: listfunds, listpeerchannels, getinfo`,
-  "readonly.rf": `# CLN's built-in readonly pattern
+  "monitoring.rf": `# Read-only access for a monitoring bot
 allow methods: ^list, ^get, summary
 
-# Deny listdatastore — it contains sensitive data
+# Deny listdatastore — stores sensitive data
 global:
   method / listdatastore`,
-  "tagged.rf": `tag: operator_id default-operator
+  "payments.rf": `allow methods: listfunds, getinfo, xpay
 
-allow methods: listfunds, listpeerchannels, fundchannel, close, invoice, xpay
+when xpay:
+  pnameamount_msat < 100000000 or pnameamount_msat !
+  rate = 10`,
+  "operator.rf": `id: 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605
+
+tag: role channel-operator
+tag: version 1
+
+allow methods: ^list, getinfo, fundchannel, close, xpay
 
 when fundchannel:
   pnameamount < 1000001
 
 when xpay:
-  pnameamount_msat < 1000000001 or pnameamount_msat !`,
-  "advanced.rf": `id: 02abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab
-
-tag: operator_id advanced-operator
-tag: version 2
-
-allow methods: listfunds, listpeerchannels, listchannels, listpays, listinvoices, getinfo, fundchannel, close, invoice, xpay, waitanyinvoice
-
-when fundchannel:
-  pnameamount < 1000001
-
-when xpay:
-  (pnameamount_msat < 1000000001 or pnameamount_msat !) and rate = 10
+  (pnameamount_msat < 100000000 or pnameamount_msat !) and rate = 10
 
 when close:
-  pnamedestination = bc1qexamplecoldwalletaddress
+  pnamedestination = bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
 
 global:
   per = 1min`,
@@ -42,7 +37,7 @@ global:
 
 @customElement("rf-playground")
 export class RfPlayground extends LitElement {
-  @property() source = EXAMPLES["simple.rf"];
+  @property() source = EXAMPLES["monitoring.rf"];
   @property() format: "json" | "cln" | "raw" | "rune" = "json";
   @property({ type: Boolean }) readonly = false;
   @property({ type: Boolean }) minimal = false;

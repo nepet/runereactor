@@ -8,48 +8,39 @@ weight = 2
 
 Each example below includes an interactive editor — modify the policy and see the compiled output update in real-time. They are ordered from simplest to most complex.
 
-## Simple Method Whitelist
+## Monitoring Bot
 
-The most basic policy — just allow a few methods with no additional constraints.
+Read-only access using prefix matching, with a deny rule for sensitive data.
 
-<rf-playground minimal format="json" source="allow methods: listfunds, listpeerchannels, getinfo"></rf-playground>
-
-This policy:
-- Allows only three read-only methods: `listfunds`, `listpeerchannels`, and `getinfo`
-- No tags, no constraints — the simplest possible rune policy
-
-## Read-Only Access (CLN pattern)
-
-This is equivalent to Core Lightning's built-in `readonly` restriction — using prefix matching and a deny to exclude sensitive data.
-
-<rf-playground minimal format="cln" source="allow methods: ^list, ^get, summary&#10;&#10;global:&#10;  method / listdatastore"></rf-playground>
+<rf-playground minimal format="json" source="# Read-only access for a monitoring bot&#10;allow methods: ^list, ^get, summary&#10;&#10;# Deny listdatastore — stores sensitive data&#10;global:&#10;  method / listdatastore"></rf-playground>
 
 This policy:
 - Allows any method starting with `list` or `get`, plus `summary` — using the `^` prefix operator
 - Denies `listdatastore` via a global restriction (it contains sensitive data)
-- Two restrictions work together: the allow (OR'd) and the deny (AND'd)
+- Two restrictions work together: the allow (OR'd alternatives) and the deny (AND'd separately)
 
-## Tagged Operator Policy
+## Payment App
 
-A policy with tags, method whitelisting, and conditional constraints on specific methods.
+A spending-limited rune for an app that can check balances and send payments.
 
-<rf-playground minimal format="json" source="tag: operator_id default-operator&#10;&#10;allow methods: listfunds, listpeerchannels, fundchannel, close, invoice, xpay&#10;&#10;when fundchannel:&#10;  pnameamount < 1000001&#10;&#10;when xpay:&#10;  pnameamount_msat < 1000000001 or pnameamount_msat !"></rf-playground>
-
-This policy:
-- Tags the rune with an operator ID for auditing
-- Allows six methods including both read-only and state-changing operations
-- Limits `fundchannel` amounts to at most 1,000,000 sats
-- When calling `xpay`, the payment amount must be under ~1 BTC — or the amount field must be absent (invoice-embedded amount)
-
-## Advanced Policy with Rate Limiting
-
-A more complex policy that combines peer restriction, method whitelisting, conditional constraints, and global rate limiting.
-
-<rf-playground minimal format="raw" source="id: 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605&#10;&#10;tag: purpose channel-management&#10;tag: version 1&#10;&#10;allow methods: listfunds, listpeerchannels, fundchannel, close&#10;&#10;when fundchannel:&#10;  pnameamount < 1000001&#10;&#10;when close:&#10;  pnamedestination = bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh&#10;&#10;global:&#10;  rate = 10"></rf-playground>
+<rf-playground minimal format="json" source="allow methods: listfunds, getinfo, xpay&#10;&#10;when xpay:&#10;  pnameamount_msat < 100000000 or pnameamount_msat !&#10;  rate = 10"></rf-playground>
 
 This policy:
-- Restricts the rune to a specific commando peer (by node public key)
-- Allows four methods: two read-only and two that modify state
-- Limits `fundchannel` amounts to at most 1,000,000 sats
-- Requires `close` to send funds to a specific cold wallet address
-- Applies a global rate limit of 10 uses per minute across all methods
+- Allows `listfunds` and `getinfo` for balance checks, plus `xpay` for payments
+- Caps `xpay` payments at 100,000,000 msat (~1000 sats) — or allows invoice-embedded amounts (`!` = field absent)
+- Rate limits `xpay` to 10 calls per minute
+
+## Channel Operator
+
+A full policy combining peer restriction, tags, prefix matching, conditional constraints with grouping, and a global rate limit.
+
+<rf-playground minimal format="raw" source="id: 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605&#10;&#10;tag: role channel-operator&#10;tag: version 1&#10;&#10;allow methods: ^list, getinfo, fundchannel, close, xpay&#10;&#10;when fundchannel:&#10;  pnameamount < 1000001&#10;&#10;when xpay:&#10;  (pnameamount_msat < 100000000 or pnameamount_msat !) and rate = 10&#10;&#10;when close:&#10;  pnamedestination = bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh&#10;&#10;global:&#10;  per = 1min"></rf-playground>
+
+This policy:
+- Locked to a specific commando peer by node public key
+- Tagged with role and version for auditing (visible in `showrunes` output)
+- Uses `^list` prefix for all read methods, plus specific write methods
+- Limits `fundchannel` to 1,000,000 sats
+- Caps `xpay` at ~1000 sats with rate limiting — using parenthesized grouping `(... or ...) and ...`
+- Forces `close` to send to a specific cold wallet address
+- Global rate limit of 1 call per minute across all methods

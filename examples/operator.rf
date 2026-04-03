@@ -1,0 +1,18 @@
+id: 024b9a1fa8e006f1e3937f65f66c408e6da8e1ca728ea43222a7381df1cc449605
+
+tag: role channel-operator
+tag: version 1
+
+allow methods: ^list, getinfo, fundchannel, close, xpay
+
+when fundchannel:
+  pnameamount < 1000001
+
+when xpay:
+  (pnameamount_msat < 100000000 or pnameamount_msat !) and rate = 10
+
+when close:
+  pnamedestination = bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+
+global:
+  per = 1min
