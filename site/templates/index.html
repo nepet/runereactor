@@ -2,40 +2,50 @@
 <section class="hero">
     <h1>rune-reactor</h1>
     <p class="tagline">
-        Write human-readable policies for Core Lightning runes.<br />
-        Compile to JSON, CLN commands, or raw restrictions.
+        Human-readable authorization policies for Core Lightning.
+    </p>
+    <p class="hero-sub">
+        Compile <code>.rf</code> policy files into the restriction arrays
+        used by <code>lightning-cli createrune</code>.
     </p>
 </section>
+
 <section class="demo">
+    <h2 class="section-heading">See it in action</h2>
     <rf-playground
-        readonly
+        minimal
         format="json"
         source="allow methods: listfunds, xpay&#10;&#10;when xpay:&#10;  pnameamount_msat < 1000000001 or pnameamount_msat !"
     ></rf-playground>
+    <div class="demo-footer">
+        <span class="trust-line">Runs entirely in your browser — your policies never leave your machine.</span>
+        <a href="/playground" class="demo-cta">Open full Playground &rarr;</a>
+    </div>
 </section>
-<section class="features">
-    <div class="feature-grid">
-        <div class="feature-card">
-            <h3>Human-Readable</h3>
+
+<section class="tools">
+    <div class="tool-grid">
+        <a href="/playground" class="tool-card">
+            <h3>Playground</h3>
             <p>
-                Write policies in plain English-like syntax instead of cryptic
-                restriction arrays.
+                Write <code>.rf</code> policies with live compilation to JSON,
+                CLN commands, or signed runes. Includes example policies and shareable URLs.
             </p>
-        </div>
-        <div class="feature-card">
-            <h3>CNF Compiler</h3>
+        </a>
+        <a href="/decoder" class="tool-card">
+            <h3>Decoder</h3>
             <p>
-                Automatic conversion to Conjunctive Normal Form — handles
-                complex boolean logic for you.
+                Paste a raw restriction string or base64 rune and see its
+                conditions broken down into human-readable form.
             </p>
-        </div>
-        <div class="feature-card">
-            <h3>Client-Side</h3>
+        </a>
+        <a href="/builder" class="tool-card">
+            <h3>Builder</h3>
             <p>
-                Everything runs in your browser via WASM. No data sent to any
-                server.
+                Build authorization policies visually with a form — no syntax
+                knowledge needed.
             </p>
-        </div>
+        </a>
     </div>
 </section>
 {% endblock %}
