@@ -45,6 +45,7 @@ export class RfPlayground extends LitElement {
   @property() source = EXAMPLES["simple.rf"];
   @property() format: "json" | "cln" | "raw" | "rune" = "json";
   @property({ type: Boolean }) readonly = false;
+  @property({ type: Boolean }) minimal = false;
 
   @state() private _output = "";
   @state() private _error = "";
@@ -90,6 +91,7 @@ export class RfPlayground extends LitElement {
 
   render() {
     return html`
+      ${this.minimal ? '' : html`
       <div class="toolbar">
         <div style="display:flex;gap:0.6rem;align-items:center">
           <span style="color:#666">Examples:</span>
@@ -102,6 +104,7 @@ export class RfPlayground extends LitElement {
           <span class="share-toast ${this._shareMsg ? "visible" : ""}">${this._shareMsg}</span>
         </div>
       </div>
+      `}
       <div class="editor-split">
         <div class="pane">
           <div class="pane-header">Policy</div>
