@@ -46,7 +46,7 @@ when close:
 |-----------|---------|---------|
 | `id: hex` | Restrict to a specific commando peer (see below) | `id: 024b9a1f...` |
 | `tag: field value` | Attach metadata to the rune (see below) | `tag: purpose payments` |
-| `allow methods: a, b, c` | Method whitelist | `allow methods: listfunds, xpay` |
+| `allow methods: a, b, c` | Method whitelist (supports `^`, `$`, `~` prefixes) | `allow methods: ^list, xpay` |
 | `when method:` | Conditional constraints for a method | `when xpay:` |
 | `global:` | Constraints applied to all methods | `global:` |
 

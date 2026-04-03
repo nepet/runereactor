@@ -1,5 +1,5 @@
 use crate::error::ParseError;
-use crate::types::Op;
+use crate::types::{Condition, Op};
 
 /// The parsed AST from an .rf policy file.
 ///
@@ -17,8 +17,8 @@ pub enum Directive {
     Tag { field: String, value: String },
     /// `id: hex` — restrict to a specific commando peer
     Id(String),
-    /// `allow methods: a, b, c` — method whitelist
-    AllowMethods(Vec<String>),
+    /// `allow methods: a, b, c` — method whitelist (supports sigil prefixes: ^, $, ~)
+    AllowMethods(Vec<Condition>),
     /// `when method:` block — conditional restrictions
     When { method: String, body: Expr },
     /// `global:` block — restrictions applied to all methods
@@ -278,14 +278,43 @@ pub fn parse_policy(input: &str) -> Result<Policy, ParseError> {
             continue;
         }
 
-        // allow methods: method_list
+        // allow methods: method_list (with optional sigil prefixes: ^, $, ~)
         if let Some(rest) = trimmed.strip_prefix("allow methods:") {
-            let methods: Vec<String> = rest
-                .split(',')
-                .map(|s| s.trim().to_string())
-                .filter(|s| !s.is_empty())
-                .collect();
-            directives.push(Directive::AllowMethods(methods));
+            let mut conditions = Vec::new();
+            for entry in rest.split(',') {
+                let entry = entry.trim();
+                if entry.is_empty() {
+                    continue;
+                }
+                let first = entry.chars().next().unwrap();
+                if let Some(op) = Op::from_char(first) {
+                    match op {
+                        Op::StartsWith | Op::EndsWith | Op::Contains => {
+                            conditions.push(Condition {
+                                field: "method".to_string(),
+                                op,
+                                value: entry[first.len_utf8()..].to_string(),
+                            });
+                        }
+                        _ => {
+                            return Err(ParseError::Syntax {
+                                line: i + 1,
+                                message: format!(
+                                    "unsupported operator '{}' in allow methods (only ^, $, ~ are allowed)",
+                                    first
+                                ),
+                            });
+                        }
+                    }
+                } else {
+                    conditions.push(Condition {
+                        field: "method".to_string(),
+                        op: Op::Eq,
+                        value: entry.to_string(),
+                    });
+                }
+            }
+            directives.push(Directive::AllowMethods(conditions));
             i += 1;
             continue;
         }
@@ -394,14 +423,44 @@ mod tests {
         let policy = parse_policy("allow methods: listfunds, xpay, invoice\n").unwrap();
         assert_eq!(policy.directives.len(), 1);
         match &policy.directives[0] {
-            Directive::AllowMethods(methods) => {
-                assert_eq!(methods.len(), 3);
-                assert_eq!(methods[0], "listfunds");
-                assert_eq!(methods[1], "xpay");
-                assert_eq!(methods[2], "invoice");
+            Directive::AllowMethods(conditions) => {
+                assert_eq!(conditions.len(), 3);
+                assert_eq!(conditions[0].field, "method");
+                assert_eq!(conditions[0].op, crate::types::Op::Eq);
+                assert_eq!(conditions[0].value, "listfunds");
+                assert_eq!(conditions[1].value, "xpay");
+                assert_eq!(conditions[2].value, "invoice");
             }
             other => panic!("expected AllowMethods, got {:?}", other),
         }
+    }
+
+    #[test]
+    fn test_parse_allow_methods_with_operators() {
+        let policy =
+            parse_policy("allow methods: listfunds, ^list, ~pay, $channel\n").unwrap();
+        match &policy.directives[0] {
+            Directive::AllowMethods(conditions) => {
+                assert_eq!(conditions.len(), 4);
+                assert_eq!(conditions[0].op, crate::types::Op::Eq);
+                assert_eq!(conditions[0].value, "listfunds");
+                assert_eq!(conditions[1].op, crate::types::Op::StartsWith);
+                assert_eq!(conditions[1].value, "list");
+                assert_eq!(conditions[2].op, crate::types::Op::Contains);
+                assert_eq!(conditions[2].value, "pay");
+                assert_eq!(conditions[3].op, crate::types::Op::EndsWith);
+                assert_eq!(conditions[3].value, "channel");
+            }
+            other => panic!("expected AllowMethods, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_parse_allow_methods_invalid_operator() {
+        let result = parse_policy("allow methods: listfunds, /admin\n");
+        assert!(result.is_err());
+        let err = result.unwrap_err().to_string();
+        assert!(err.contains("unsupported operator"));
     }
 
     #[test]

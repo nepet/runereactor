@@ -79,16 +79,10 @@ pub fn compile(policy: &Policy) -> Result<RunePolicy, CompileError> {
                     }],
                 });
             }
-            Directive::AllowMethods(methods) => {
-                let alternatives = methods
-                    .iter()
-                    .map(|m| Condition {
-                        field: "method".to_string(),
-                        op: Op::Eq,
-                        value: m.clone(),
-                    })
-                    .collect();
-                restrictions.push(Restriction { alternatives });
+            Directive::AllowMethods(conditions) => {
+                restrictions.push(Restriction {
+                    alternatives: conditions.clone(),
+                });
             }
             Directive::When { method, body } => {
                 let clauses = expr_to_cnf(body);
@@ -157,8 +151,8 @@ mod tests {
     fn test_compile_allow_methods() {
         let policy = Policy {
             directives: vec![Directive::AllowMethods(vec![
-                "listfunds".to_string(),
-                "xpay".to_string(),
+                Condition { field: "method".into(), op: Op::Eq, value: "listfunds".into() },
+                Condition { field: "method".into(), op: Op::Eq, value: "xpay".into() },
             ])],
         };
         let rune = compile(&policy).unwrap();
@@ -169,6 +163,27 @@ mod tests {
         assert_eq!(alts[0].op, Op::Eq);
         assert_eq!(alts[0].value, "listfunds");
         assert_eq!(alts[1].value, "xpay");
+    }
+
+    #[test]
+    fn test_compile_allow_methods_mixed_operators() {
+        let policy = Policy {
+            directives: vec![Directive::AllowMethods(vec![
+                Condition { field: "method".into(), op: Op::Eq, value: "getinfo".into() },
+                Condition { field: "method".into(), op: Op::StartsWith, value: "list".into() },
+                Condition { field: "method".into(), op: Op::Contains, value: "fund".into() },
+                Condition { field: "method".into(), op: Op::EndsWith, value: "channel".into() },
+            ])],
+        };
+        let rune = compile(&policy).unwrap();
+        assert_eq!(rune.restrictions.len(), 1);
+        let alts = &rune.restrictions[0].alternatives;
+        assert_eq!(alts.len(), 4);
+        assert_eq!(alts[0].op, Op::Eq);
+        assert_eq!(alts[1].op, Op::StartsWith);
+        assert_eq!(alts[1].value, "list");
+        assert_eq!(alts[2].op, Op::Contains);
+        assert_eq!(alts[3].op, Op::EndsWith);
     }
 
     #[test]

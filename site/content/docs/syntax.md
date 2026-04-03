@@ -34,7 +34,16 @@ Adds metadata as a comment restriction (`#` operator). Comment restrictions alwa
 
 Creates a method whitelist. The listed methods are the only ones the rune holder can call.
 
-<rf-playground format="raw" source="allow methods: listfunds, listpeerchannels, xpay"></rf-playground>
+Bare names are exact matches. You can also use operator prefixes for pattern matching:
+
+| Prefix | Operator | Example | Matches |
+|--------|----------|---------|---------|
+| *(none)* | `=` exact match | `listfunds` | only `listfunds` |
+| `^` | starts with | `^list` | `listfunds`, `listpeerchannels`, ... |
+| `$` | ends with | `$channel` | `fundchannel`, `listpeerchannels`, ... |
+| `~` | contains | `~fund` | `listfunds`, `fundchannel`, ... |
+
+<rf-playground format="raw" source="allow methods: getinfo, ^list, ~fund"></rf-playground>
 
 ### when
 

@@ -22,10 +22,21 @@ pub struct TagSpec {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct MethodSpec {
+    #[serde(default = "default_method_op")]
+    pub op: String,
+    pub value: String,
+}
+
+fn default_method_op() -> String {
+    "=".to_string()
+}
+
+#[derive(Debug, Deserialize)]
 pub struct PolicySpec {
     pub tag: Option<TagSpec>,
     pub id: Option<String>,
-    pub methods: Vec<String>,
+    pub methods: Vec<MethodSpec>,
     #[serde(default)]
     pub when: Vec<WhenSpec>,
     #[serde(default)]
@@ -46,7 +57,18 @@ pub fn generate_policy(spec: &PolicySpec) -> Result<String, CompileError> {
     }
 
     if !spec.methods.is_empty() {
-        output.push_str(&format!("allow methods: {}\n", spec.methods.join(", ")));
+        let method_strs: Vec<String> = spec
+            .methods
+            .iter()
+            .map(|m| {
+                if m.op == "=" {
+                    m.value.clone()
+                } else {
+                    format!("{}{}", m.op, m.value)
+                }
+            })
+            .collect();
+        output.push_str(&format!("allow methods: {}\n", method_strs.join(", ")));
     }
 
     for when in &spec.when {
@@ -85,12 +107,32 @@ mod tests {
         let spec = PolicySpec {
             tag: None,
             id: None,
-            methods: vec!["listfunds".into(), "xpay".into()],
+            methods: vec![
+                MethodSpec { op: "=".into(), value: "listfunds".into() },
+                MethodSpec { op: "=".into(), value: "xpay".into() },
+            ],
             when: vec![],
             global: vec![],
         };
         let result = generate_policy(&spec).unwrap();
         assert_eq!(result, "allow methods: listfunds, xpay\n");
+    }
+
+    #[test]
+    fn test_generate_methods_with_operators() {
+        let spec = PolicySpec {
+            tag: None,
+            id: None,
+            methods: vec![
+                MethodSpec { op: "=".into(), value: "getinfo".into() },
+                MethodSpec { op: "^".into(), value: "list".into() },
+                MethodSpec { op: "~".into(), value: "fund".into() },
+            ],
+            when: vec![],
+            global: vec![],
+        };
+        let result = generate_policy(&spec).unwrap();
+        assert_eq!(result, "allow methods: getinfo, ^list, ~fund\n");
     }
 
     #[test]
@@ -101,7 +143,7 @@ mod tests {
                 value: "default-operator".into(),
             }),
             id: None,
-            methods: vec!["listfunds".into()],
+            methods: vec![MethodSpec { op: "=".into(), value: "listfunds".into() }],
             when: vec![],
             global: vec![],
         };
@@ -114,7 +156,7 @@ mod tests {
         let spec = PolicySpec {
             tag: None,
             id: Some("02abcdef".into()),
-            methods: vec!["listfunds".into()],
+            methods: vec![MethodSpec { op: "=".into(), value: "listfunds".into() }],
             when: vec![],
             global: vec![],
         };
@@ -127,7 +169,7 @@ mod tests {
         let spec = PolicySpec {
             tag: None,
             id: None,
-            methods: vec!["xpay".into()],
+            methods: vec![MethodSpec { op: "=".into(), value: "xpay".into() }],
             when: vec![WhenSpec {
                 method: "xpay".into(),
                 conditions: vec![ConditionSpec {
@@ -147,7 +189,7 @@ mod tests {
         let spec = PolicySpec {
             tag: None,
             id: None,
-            methods: vec!["xpay".into()],
+            methods: vec![MethodSpec { op: "=".into(), value: "xpay".into() }],
             when: vec![WhenSpec {
                 method: "xpay".into(),
                 conditions: vec![ConditionSpec {
@@ -167,7 +209,7 @@ mod tests {
         let spec = PolicySpec {
             tag: None,
             id: None,
-            methods: vec!["xpay".into()],
+            methods: vec![MethodSpec { op: "=".into(), value: "xpay".into() }],
             when: vec![],
             global: vec![ConditionSpec {
                 field: "per".into(),
@@ -187,7 +229,10 @@ mod tests {
                 value: "default-operator".into(),
             }),
             id: None,
-            methods: vec!["listfunds".into(), "xpay".into()],
+            methods: vec![
+                MethodSpec { op: "=".into(), value: "listfunds".into() },
+                MethodSpec { op: "=".into(), value: "xpay".into() },
+            ],
             when: vec![WhenSpec {
                 method: "xpay".into(),
                 conditions: vec![ConditionSpec {

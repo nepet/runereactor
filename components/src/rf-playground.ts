@@ -5,7 +5,7 @@ import "./rf-output.js";
 
 const EXAMPLES: Record<string, string> = {
   "simple.rf": `allow methods: listfunds, listpeerchannels, getinfo`,
-  "readonly.rf": `allow methods: listfunds, listpeerchannels, listchannels, listpays, listinvoices, getinfo, waitanyinvoice`,
+  "readonly.rf": `allow methods: ^list, getinfo, waitanyinvoice`,
   "tagged.rf": `tag: operator_id default-operator
 
 allow methods: listfunds, listpeerchannels, fundchannel, close, invoice, xpay
