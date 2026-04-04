@@ -68,6 +68,36 @@ export class RfPlayground extends LitElement {
     .status-ok { color: #16a34a; }
     .status-err { color: #dc2626; }
     .status-version { color: #999; }
+    @media (max-width: 600px) {
+      .toolbar {
+        flex-direction: column;
+        gap: 0.4rem;
+        padding: 0.5rem 0.8rem;
+        justify-content: flex-start;
+      }
+      .toolbar select,
+      .toolbar button {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.8rem;
+      }
+      .editor-split {
+        flex-direction: column;
+      }
+      .pane {
+        min-height: 150px;
+      }
+      .pane + .pane {
+        border-left: none;
+        border-top: 1px solid #e2e4e8;
+      }
+      textarea {
+        font-size: 0.9rem;
+        padding: 0.9rem;
+      }
+      .status {
+        font-size: 0.75rem;
+      }
+    }
   `;
 
   connectedCallback() {

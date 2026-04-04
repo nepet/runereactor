@@ -24,6 +24,29 @@ export class RfOutput extends LitElement {
     .secret-row input { flex: 1; border: 1px solid #e2e4e8; border-radius: 4px; padding: 0.25rem 0.4rem; font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 0.75rem; color: #0c0c0f; outline: none; min-width: 0; }
     .secret-row input:focus { border-color: #00c3ff; }
     .secret-row .hint { color: #999; font-size: 0.65rem; font-family: system-ui, -apple-system, sans-serif; text-transform: none; letter-spacing: normal; }
+    @media (max-width: 600px) {
+      .toolbar {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        padding: 0.5rem 0.8rem;
+      }
+      .toolbar button {
+        padding: 0.35rem 0.3rem;
+        font-size: 0.8rem;
+      }
+      .secret-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.4rem;
+      }
+      .secret-row input {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.5rem;
+      }
+      .output {
+        font-size: 0.9rem;
+      }
+    }
   `;
 
   private _formats: Array<"json" | "cln" | "raw" | "rune"> = ["json", "cln", "raw", "rune"];

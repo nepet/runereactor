@@ -128,6 +128,23 @@ nav {
   }
 }
 
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+
+  span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: $text;
+    margin: 4px 0;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+}
+
 // --- Main ---
 main {
   flex: 1;
@@ -436,16 +453,37 @@ footer {
     align-items: flex-start;
   }
 
-  .nav-links {
-    gap: 1rem;
-
-    a {
-      font-size: 0.8rem;
-    }
+  .nav-toggle {
+    display: block;
   }
 
   .nav-inner {
     padding: 0 1rem;
+    height: auto;
+    min-height: 56px;
+    flex-wrap: wrap;
+  }
+
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 0;
+    padding: 0.5rem 0;
+    border-top: 1px solid $border;
+
+    &.open {
+      display: flex;
+    }
+
+    a {
+      font-size: 0.9rem;
+      padding: 0.6rem 0;
+    }
+
+    .nav-github {
+      padding: 0.6rem 0;
+    }
   }
 
   .page-content {

@@ -166,6 +166,32 @@ export class RfDecoder extends LitElement {
     .verify-result { margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; }
     .verify-pass { color: #16a34a; }
     .verify-fail { color: #dc2626; }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    @media (max-width: 600px) {
+      textarea {
+        font-size: 0.9rem;
+      }
+      th:nth-child(3),
+      td:nth-child(3) {
+        display: none;
+      }
+      .verify-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .verify-row input {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.5rem;
+      }
+      .verify-btn {
+        width: 100%;
+        padding: 0.5rem 0.8rem;
+      }
+    }
   `;
 
   render() {
@@ -199,7 +225,7 @@ export class RfDecoder extends LitElement {
           <div class="restriction-header">
             Restriction #${i + 1} &mdash; ${r.alternatives.length} alternative${r.alternatives.length !== 1 ? "s" : ""}
           </div>
-          <table>
+          <div class="table-scroll"><table>
             <tr><th>Field</th><th>Operator</th><th>Meaning</th><th>Value</th></tr>
             ${r.alternatives.map(
               (alt, j) => html`
@@ -212,7 +238,7 @@ export class RfDecoder extends LitElement {
                 </tr>
               `
             )}
-          </table>
+          </table></div>
         </div>
       `
     );
